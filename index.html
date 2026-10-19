@@ -1,0 +1,926 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>CS650 Chapter 6: Adversarial Search and Games — interactive lab</title>
+<meta name="description" content="Step-by-step illustrated lessons on adversarial search and games for CS650 at Monroe University.">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Literata:ital,opsz,wght@0,7..72,400;0,7..72,500;0,7..72,600;0,7..72,700;1,7..72,400;1,7..72,600&display=swap" rel="stylesheet">
+<style>
+:root{--paper:#F7F9FC;--card:#FFFFFF;--ink:#1B2B44;--muted:#5E6E85;--line:#A9B6C8;--grid:#E4EAF2;--soft:#EEF2F7;
+--r:#D1495B;--g:#2E8B57;--b:#3567C9;--focus:#C9821F;--focus-soft:#FBEBD3;--bad:#B3202F;--bad-soft:#FBE6E8;--ok:#1F7A5C;--ok-soft:#E1F2EA;--panel:#FFFFFF;color-scheme:light;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--paper:#121C2B;--card:#1B2738;--ink:#E6EDF7;--muted:#9AA9BF;--line:#4A5B74;--grid:#1C2A3D;--soft:#22324A;
+--r:#E5677A;--g:#4DB383;--b:#6F96E8;--focus:#E8A33D;--focus-soft:#3B3020;--bad:#F07A86;--bad-soft:#3A2228;--ok:#5CC79C;--ok-soft:#1E3A30;--panel:#172235;color-scheme:dark}}
+:root[data-theme="dark"]{--paper:#121C2B;--card:#1B2738;--ink:#E6EDF7;--muted:#9AA9BF;--line:#4A5B74;--grid:#1C2A3D;--soft:#22324A;
+--r:#E5677A;--g:#4DB383;--b:#6F96E8;--focus:#E8A33D;--focus-soft:#3B3020;--bad:#F07A86;--bad-soft:#3A2228;--ok:#5CC79C;--ok-soft:#1E3A30;--panel:#172235;color-scheme:dark}
+*,*::before,*::after{box-sizing:inherit}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:'Literata',Georgia,'Times New Roman',serif;font-size:17px;line-height:1.6}
+button,select{font:inherit}
+.wrap{display:grid;grid-template-columns:270px minmax(0,1fr);min-height:100vh}
+nav{border-right:1px solid var(--line);padding:28px 18px 40px;position:sticky;top:env(safe-area-inset-top,0px);height:100vh;overflow-y:auto;background:var(--panel)}
+nav .course{font-size:.86rem;color:var(--muted);margin:0 0 2px}
+nav .chap{font-size:1.25rem;font-weight:700;line-height:1.25;margin:0 0 22px}
+nav h3{font-size:.95rem;font-weight:600;font-style:italic;color:var(--muted);margin:20px 0 6px}
+nav ol{list-style:none;margin:0;padding:0}
+nav a{display:grid;grid-template-columns:4.6em 1fr;gap:6px;padding:6px 8px;border-radius:6px;color:var(--ink);text-decoration:none;font-size:.9rem;line-height:1.3}
+nav a .num{color:var(--muted);font-variant-numeric:tabular-nums;font-size:.82rem;padding-top:1px}
+nav a:hover{background:var(--soft)}
+nav a[aria-current="true"]{background:var(--ink);color:var(--paper)}
+nav a[aria-current="true"] .num{color:var(--paper);opacity:.75}
+.navsel{display:none}
+main{padding:34px clamp(18px,4vw,56px) 60px;max-width:1040px;width:100%}
+.head{display:flex;justify-content:space-between;align-items:flex-start;gap:18px;flex-wrap:wrap}
+.sectnum{font-size:2.6rem;font-style:italic;font-weight:400;line-height:1;margin:0;color:var(--muted)}
+h1{font-size:clamp(1.55rem,3vw,2.15rem);line-height:1.15;margin:8px 0 10px;font-weight:700;letter-spacing:-.01em}
+.intro{max-width:68ch;margin:0 0 22px;color:var(--ink)}
+.toggle{font-family:system-ui,-apple-system,'Segoe UI',sans-serif;font-size:.85rem;border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:999px;padding:7px 14px;cursor:pointer;white-space:nowrap}
+.toggle[aria-pressed="true"]{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+figure{margin:0;border:1.5px solid var(--ink);border-radius:14px;overflow:hidden;
+background-color:var(--paper);background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);background-size:24px 24px}
+figure svg{display:block;width:100%;height:auto;max-height:62vh}
+figure svg text{font-family:'Literata',Georgia,serif}
+figure svg text.mono,figure svg .mono text{font-family:ui-monospace,'SF Mono',Menlo,Consolas,monospace}
+.caption{border-top:1.5px solid var(--ink);background:var(--card);padding:16px 22px 18px;min-height:5.4em;display:grid;grid-template-columns:auto 1fr;gap:16px;align-items:start}
+.caption .count{font-variant-numeric:tabular-nums;color:var(--muted);font-size:.9rem;padding-top:3px;white-space:nowrap}
+.caption p{margin:0;font-size:1.08rem;max-width:66ch}
+.controls{display:flex;align-items:center;gap:10px;margin:16px 0 0;flex-wrap:wrap;font-family:system-ui,-apple-system,'Segoe UI',sans-serif}
+.btn{border:1.5px solid var(--ink);background:var(--card);color:var(--ink);border-radius:8px;padding:9px 16px;font-size:.95rem;font-weight:600;cursor:pointer}
+.btn.primary{background:var(--ink);color:var(--paper)}
+.btn:disabled{opacity:.4;cursor:default}
+.dots{display:flex;gap:6px;flex-wrap:wrap;flex:1;justify-content:center;min-width:120px}
+.dots button{width:12px;height:12px;border-radius:50%;border:1.5px solid var(--ink);background:transparent;padding:0;cursor:pointer}
+.dots button[aria-current="true"]{background:var(--ink)}
+.dots button.seen{background:var(--line);border-color:var(--line)}
+:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
+.below{display:grid;grid-template-columns:1.3fr 1fr;gap:26px;margin-top:34px}
+.below h2{font-size:1.05rem;margin:0 0 8px;font-weight:700}
+.quiz p.q{margin:0 0 10px}
+.quiz .opts{display:grid;gap:8px}
+.quiz button{text-align:left;border:1.5px solid var(--line);background:var(--card);color:var(--ink);border-radius:8px;padding:9px 13px;cursor:pointer;font-size:.97rem}
+.quiz button.right{border-color:var(--ok);background:var(--ok-soft)}
+.quiz button.wrong{border-color:var(--bad);background:var(--bad-soft)}
+.quiz .why{margin:10px 0 0;font-size:.95rem;min-height:1.5em}
+.apply p{margin:0;font-size:.97rem}
+.note{margin-top:18px;border-left:4px solid var(--focus);background:var(--focus-soft);padding:10px 14px;border-radius:0 8px 8px 0;font-size:.95rem}
+.note[hidden]{display:none}
+footer{margin-top:44px;padding-top:16px;border-top:1px solid var(--line);font-size:.85rem;color:var(--muted);max-width:75ch}
+@media (max-width:860px){.wrap{grid-template-columns:1fr}nav{position:static;height:auto;border-right:0;border-bottom:1px solid var(--line);padding:18px 18px 14px}
+nav ol,nav h3{display:none}.navsel{display:block;width:100%;padding:9px 10px;border:1.5px solid var(--ink);border-radius:8px;background:var(--card);color:var(--ink)}nav .chap{margin-bottom:12px}
+main{padding-top:22px}.below{grid-template-columns:1fr}.sectnum{font-size:2rem}figure svg{max-height:none}}
+@media (prefers-reduced-motion:no-preference){figure svg{animation:fade .25s ease-out}@keyframes fade{from{opacity:.55}to{opacity:1}}}
+@media print{nav,.controls,.toggle{display:none}.wrap{display:block}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<nav aria-label="Lessons">
+  <p class="course">CS650, Monroe University</p>
+  <p class="chap">Chapter 6: Adversarial search and games</p>
+  <select class="navsel" id="navsel" aria-label="Choose a lesson"></select>
+  <div id="navlist"></div>
+</nav>
+<main>
+  <div class="head">
+    <div><p class="sectnum" id="sectnum"></p><h1 id="title"></h1></div>
+    <button class="toggle" id="notesBtn" aria-pressed="false">Instructor notes</button>
+  </div>
+  <p class="intro" id="intro"></p>
+  <figure>
+    <div id="fig"></div>
+    <div class="caption"><span class="count" id="count"></span><p id="cap" aria-live="polite"></p></div>
+  </figure>
+  <div class="controls">
+    <button class="btn" id="prev">Previous step</button>
+    <div class="dots" id="dots" role="group" aria-label="Steps"></div>
+    <button class="btn" id="play" aria-pressed="false">Play</button>
+    <button class="btn primary" id="next">Next step</button>
+  </div>
+  <p class="note" id="note" hidden></p>
+  <div class="below">
+    <section class="quiz" aria-labelledby="qh"><h2 id="qh">Check your understanding</h2><p class="q" id="q"></p><div class="opts" id="opts"></div><p class="why" id="why" aria-live="polite"></p></section>
+    <section class="apply" aria-labelledby="ah"><h2 id="ah">Where you will meet this</h2><p id="apply"></p></section>
+  </div>
+  <footer>Original illustrations and explanations for teaching, following the section numbering of Russell &amp; Norvig, <i>Artificial Intelligence: A Modern Approach</i>, 4th Global Edition, Chapter 6. Every tree value, pruning trace, UCB1 score and belief state on this page is computed by the page’s own code. Use the arrow keys to step through a lesson.</footer>
+</main>
+</div>
+<script>
+'use strict';
+/* ---------- palette (CSS variables so light/dark both work) ---------- */
+const K = { ink: 'var(--ink)', muted: 'var(--muted)', line: 'var(--line)', paper: 'var(--paper)', card: 'var(--card)',
+  R: 'var(--r)', G: 'var(--g)', B: 'var(--b)', focus: 'var(--focus)', bad: 'var(--bad)', ok: 'var(--ok)', soft: 'var(--soft)', badSoft: 'var(--bad-soft)', okSoft: 'var(--ok-soft)', focusSoft: 'var(--focus-soft)' };
+const COLOR = { R: K.R, G: K.G, B: K.B };
+const CNAME = { R: 'red', G: 'green', B: 'blue' };
+const esc = t => String(t).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+
+/* ---------- primitives: each returns an SVG string ---------- */
+function T(x, y, t, o = {}) {
+  const lines = String(t).split('\n'), lh = (o.size || 15) * 1.25;
+  return lines.map((s, k) => `<text x="${x}" y="${y + k * lh}" font-size="${o.size || 15}" fill="${o.color || K.ink}" text-anchor="${o.anchor || 'middle'}" font-weight="${o.weight || 500}"${o.italic ? ' font-style="italic"' : ''}${o.mono ? ' class="mono"' : ''}>${esc(s)}</text>`).join('');
+}
+function N(x, y, label, o = {}) {
+  const r = o.r || 24, fill = o.fill || K.card, dim = o.dim ? ' opacity="0.28"' : '';
+  const ring = o.ring ? `<circle cx="${x}" cy="${y}" r="${r + 6}" fill="none" stroke="${o.ring}" stroke-width="3.5"/>` : '';
+  const dark = [K.R, K.G, K.B, K.ink, K.bad, K.ok].includes(fill);
+  return `<g${dim}>${ring}<circle cx="${x}" cy="${y}" r="${r}" fill="${fill}" stroke="${o.stroke || K.ink}" stroke-width="${o.sw || 1.8}"${o.dash ? ' stroke-dasharray="5 4"' : ''}/>` +
+    T(x, y + (o.fs || 14) * 0.36, label, { size: o.fs || 14, weight: 700, color: o.txt || (dark ? '#fff' : K.ink) }) + '</g>';
+}
+function E(a, b, o = {}) {
+  const r1 = o.r1 ?? 24, r2 = o.r2 ?? 24, dx = b[0] - a[0], dy = b[1] - a[1], L = Math.hypot(dx, dy), ux = dx / L, uy = dy / L, off = o.off || 0;
+  const x1 = a[0] + ux * r1 - uy * off, y1 = a[1] + uy * r1 + ux * off, x2 = b[0] - ux * (r2 + (o.arrow ? 4 : 0)) - uy * off, y2 = b[1] - uy * (r2 + (o.arrow ? 4 : 0)) + ux * off;
+  const col = o.color || K.line, w = o.w || 2.2;
+  let s = `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${col}" stroke-width="${w}" stroke-linecap="round"${o.dash ? ' stroke-dasharray="6 5"' : ''}${o.dim ? ' opacity="0.3"' : ''}/>`;
+  if (o.arrow) { const ax = x2 + ux * 4, ay = y2 + uy * 4, s1 = 11, s2 = 6; s += `<path d="M${ax},${ay} L${ax - ux * s1 - uy * s2},${ay - uy * s1 + ux * s2} L${ax - ux * s1 + uy * s2},${ay - uy * s1 - ux * s2}Z" fill="${col}"/>`; }
+  if (o.label) s += T((x1 + x2) / 2 - uy * 14, (y1 + y2) / 2 + ux * 14 + 4, o.label, { size: 12, color: o.lc || col, italic: true, weight: 600 });
+  return s;
+}
+function Badge(x, y, t, kind = 'plain', w) {
+  const st = { plain: [K.card, K.line, K.ink], new: [K.focusSoft, K.focus, K.ink], empty: [K.bad, K.bad, '#fff'], ok: [K.okSoft, K.ok, K.ink], gone: [K.badSoft, K.bad, K.bad] }[kind];
+  w = w || Math.max(34, 9 * String(t).length + 14);
+  return `<rect x="${x - w / 2}" y="${y}" width="${w}" height="22" rx="11" fill="${st[0]}" stroke="${st[1]}" stroke-width="1.4"/>` + T(x, y + 15.5, t, { size: 12.5, weight: 700, color: st[2] });
+}
+function Box(x, y, w, h, o = {}) { return `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="${o.rx ?? 8}" fill="${o.fill || K.card}" stroke="${o.stroke || K.line}" stroke-width="${o.sw || 1.4}"${o.dash ? ' stroke-dasharray="6 5"' : ''}${o.op ? ` opacity="${o.op}"` : ''}/>`; }
+function Mark(x, y, ok, size = 22) { return T(x, y + size * 0.35, ok ? '✓' : '✗', { size, weight: 800, color: ok ? K.ok : K.bad }); }
+function Dots(x, y, colors, r = 7) { return colors.split('').map((c, k) => `<circle cx="${x + k * (2 * r + 4) - (colors.length - 1) * (r + 2)}" cy="${y}" r="${r}" fill="${COLOR[c]}"/>`).join(''); }
+const svg = (inner, h = 420) => `<svg viewBox="0 0 720 ${h}" role="img" xmlns="http://www.w3.org/2000/svg">${inner}</svg>`;
+
+/* ---------- game trees ---------- */
+// build a tree from nested arrays; types[d] gives the node type at depth d ('max','min','chance')
+let NID = 0;
+function mk(spec, types, d = 0, edge = null) {
+  if (spec && typeof spec === 'object' && !Array.isArray(spec) && 'p' in spec) { const n = mk(spec.s, types, d, edge ?? String(spec.p)); n.p = spec.p; return n; }
+  if (spec && typeof spec === 'object' && !Array.isArray(spec) && 'v' in spec) return { id: 'n' + NID++, t: 'leaf', v: spec.v, edge: spec.e ?? edge };
+  if (typeof spec === 'number') return { id: 'n' + NID++, t: 'leaf', v: spec, edge };
+  const node = { id: 'n' + NID++, t: types[d], edge, kids: [] };
+  node.kids = spec.map(s => mk(s, types, d + 1));
+  return node;
+}
+const label = (n, names) => { n.kids.forEach((k, i) => { k.edge = names[i]; }); return n; };
+function leaves(n) { return n.t === 'leaf' ? [n] : n.kids.flatMap(leaves); }
+function nodes(n) { return [n].concat(n.t === 'leaf' ? [] : n.kids.flatMap(nodes)); }
+function depthOf(n) { return n.t === 'leaf' ? 0 : 1 + Math.max(...n.kids.map(depthOf)); }
+function layout(root, o = {}) { // assigns n.x, n.y
+  const L = leaves(root), x0 = o.x0 ?? 60, x1 = o.x1 ?? 660, y0 = o.y0 ?? 60, dy = o.dy ?? 100;
+  L.forEach((l, i) => { l.x = L.length === 1 ? (x0 + x1) / 2 : x0 + i * (x1 - x0) / (L.length - 1); });
+  (function place(n, d) { n.y = y0 + d * dy; if (n.t !== 'leaf') { n.kids.forEach(k => place(k, d + 1)); n.x = n.kids.reduce((s, k) => s + k.x, 0) / n.kids.length; } })(root, 0);
+  // leaves all on the bottom row
+  const D = depthOf(root); L.forEach(l => { l.y = y0 + D * dy; });
+  return root;
+}
+const fmt = v => v === Infinity ? '+∞' : v === -Infinity ? '−∞' : typeof v === 'number' ? (Number.isInteger(v) ? String(v).replace('-', '−') : v.toFixed(1)) : Array.isArray(v) ? '(' + v.join(', ') + ')' : String(v);
+function Shape(n, label, o = {}) {
+  const r = o.r || 22, x = n.x, y = n.y, fill = o.fill || K.card, st = o.stroke || K.ink, sw = o.sw || 1.8, op = o.dim ? ' opacity="0.3"' : '';
+  const dash = o.dash ? ' stroke-dasharray="5 4"' : '';
+  let s;
+  if (n.t === 'max') s = `<path d="M${x},${y - r * 1.05} L${x + r * 1.15},${y + r * 0.8} L${x - r * 1.15},${y + r * 0.8}Z" fill="${fill}" stroke="${st}" stroke-width="${sw}" stroke-linejoin="round"${dash}/>`;
+  else if (n.t === 'min') s = `<path d="M${x},${y + r * 1.05} L${x + r * 1.15},${y - r * 0.8} L${x - r * 1.15},${y - r * 0.8}Z" fill="${fill}" stroke="${st}" stroke-width="${sw}" stroke-linejoin="round"${dash}/>`;
+  else if (n.t === 'chance') s = `<circle cx="${x}" cy="${y}" r="${r}" fill="${fill}" stroke="${st}" stroke-width="${sw}"${dash}/>`;
+  else s = `<rect x="${x - r * 0.85}" y="${y - r * 0.8}" width="${r * 1.7}" height="${r * 1.6}" rx="4" fill="${fill}" stroke="${st}" stroke-width="${sw}"${dash}/>`;
+  const ring = o.ring ? `<circle cx="${x}" cy="${y + (n.t === 'max' ? 4 : n.t === 'min' ? -4 : 0)}" r="${r + 9}" fill="none" stroke="${o.ring}" stroke-width="3"/>` : '';
+  const ty = n.t === 'max' ? y + r * 0.42 : n.t === 'min' ? y + r * 0.05 : y + 5;
+  const fs = o.fs || (String(label).length > 4 ? 11.5 : 14);
+  return `<g${op}>${ring}${s}${label === '' || label == null ? '' : T(x, ty, label, { size: fs, weight: 700, color: o.txt || K.ink })}</g>`;
+}
+// draw a laid-out tree. o.val: id->label shown inside; o.hl: Set of ids drawn in focus; o.pr: Set of pruned ids; o.side: id->[text,kind] badge beside; o.under: id-> text below
+function drawTree(root, o = {}) {
+  let s = '';
+  const pr = o.pr || new Set(), hl = o.hl || new Set(), val = o.val || {}, r = o.r || 22;
+  const prunedDeep = new Set(); nodes(root).forEach(n => { if (pr.has(n.id)) nodes(n).forEach(m => prunedDeep.add(m.id)); });
+  nodes(root).forEach(n => { if (n.t === 'leaf') return; n.kids.forEach(k => {
+    const cut = prunedDeep.has(k.id), on = o.path && o.path.has(k.id) && o.path.has(n.id);
+    s += E([n.x, n.y], [k.x, k.y], { r1: r * 0.85, r2: r * 0.95, color: on ? K.focus : cut ? K.bad : K.line, w: on ? 3.4 : 2, dash: cut, label: k.edge || undefined, lc: K.muted });
+    if (cut && pr.has(k.id)) s += T((n.x + k.x) / 2 + 2, (n.y + k.y) / 2 + 6, '✂', { size: 17, color: K.bad, weight: 700 });
+  }); });
+  nodes(root).forEach(n => {
+    const cut = prunedDeep.has(n.id), lab = val[n.id] !== undefined ? val[n.id] : n.t === 'leaf' ? fmt(n.v) : '';
+    s += Shape(n, lab, { r, dim: cut || (o.dimOthers && !hl.has(n.id)), dash: cut, ring: hl.has(n.id) ? K.focus : null, fill: o.fill && o.fill[n.id] ? o.fill[n.id] : (n.t === 'leaf' && !cut ? K.soft : K.card) });
+    if (o.side && o.side[n.id]) { const [t, kind] = o.side[n.id]; s += Badge(n.x + (o.sideDx ?? 0), n.y + (o.sideDy ?? -r - 34), t, kind || 'plain'); }
+  });
+  return s;
+}
+function Legend(x, y, types) {
+  const nm = { max: 'MAX (our move)', min: 'MIN (opponent)', chance: 'chance (dice)', leaf: 'terminal utility' }; let s = '', cx = x;
+  types.forEach(t => { s += Shape({ t, x: cx, y }, '', { r: 9, sw: 1.4 }) + T(cx + 15, y + 5, nm[t], { size: 12.5, anchor: 'start', color: K.muted }); cx += 34 + nm[t].length * 6.6; });
+  return s;
+}
+/* ---------- solvers (run live; every number on the page comes from these) ---------- */
+function minimax(n, val = {}) { // fills val[id] with backed-up values
+  if (n.t === 'leaf') return val[n.id] = n.v;
+  const vs = n.kids.map(k => minimax(k, val));
+  return val[n.id] = n.t === 'max' ? Math.max(...vs) : n.t === 'min' ? Math.min(...vs) : n.kids.reduce((s, k, i) => s + k.p * vs[i], 0);
+}
+// alpha-beta with a full event log; each event: {kind, id, a, b, v}
+function alphaBeta(root) {
+  const ev = [], seen = [];
+  function rec(n, a, b) {
+    if (n.t === 'leaf') { seen.push(n.id); ev.push({ kind: 'leaf', id: n.id, v: n.v, a, b }); return n.v; }
+    ev.push({ kind: 'enter', id: n.id, a, b });
+    let v = n.t === 'max' ? -Infinity : Infinity;
+    for (let i = 0; i < n.kids.length; i++) {
+      const c = rec(n.kids[i], a, b);
+      if (n.t === 'max') { v = Math.max(v, c); if (v >= b) { ev.push({ kind: 'prune', id: n.id, v, a, b, rest: n.kids.slice(i + 1).map(k => k.id) }); return v; } a = Math.max(a, v); }
+      else { v = Math.min(v, c); if (v <= a) { ev.push({ kind: 'prune', id: n.id, v, a, b, rest: n.kids.slice(i + 1).map(k => k.id) }); return v; } b = Math.min(b, v); }
+      ev.push({ kind: 'update', id: n.id, v, a, b, from: n.kids[i].id });
+    }
+    ev.push({ kind: 'return', id: n.id, v, a, b }); return v;
+  }
+  const value = rec(root, -Infinity, Infinity);
+  const pruned = new Set(ev.filter(e => e.kind === 'prune').flatMap(e => e.rest));
+  return { value, ev, seen, pruned };
+}
+// pick the child a node chooses
+function best(n, val) { const f = n.t === 'max' ? Math.max : Math.min; const t = f(...n.kids.map(k => val[k.id])); return n.kids.find(k => val[k.id] === t); }
+// multiplayer: vectors, player index per depth
+function vecMinimax(n, players, d = 0, val = {}) {
+  if (n.t === 'leaf') return val[n.id] = n.v;
+  const vs = n.kids.map(k => vecMinimax(k, players, d + 1, val)), p = players[d];
+  let bi = 0; vs.forEach((v, i) => { if (v[p] > vs[bi][p]) bi = i; });
+  n.choice = n.kids[bi].id; return val[n.id] = vs[bi];
+}
+const ucb1 = (w, n, N, c = Math.SQRT2) => w / n + c * Math.sqrt(Math.log(N) / n);
+const r3 = x => (Math.round(x * 1000) / 1000).toFixed(3);
+/* ---------- tic-tac-toe ---------- */
+function Board(x, y, cells, o = {}) { // cells: 9-char string of X, O, .
+  const z = o.size || 26; let s = `<rect x="${x}" y="${y}" width="${3 * z}" height="${3 * z}" fill="${o.fill || K.card}" stroke="none"/>`;
+  for (let i = 1; i < 3; i++) s += `<line x1="${x + i * z}" y1="${y + 3}" x2="${x + i * z}" y2="${y + 3 * z - 3}" stroke="${K.ink}" stroke-width="1.6"/><line x1="${x + 3}" y1="${y + i * z}" x2="${x + 3 * z - 3}" y2="${y + i * z}" stroke="${K.ink}" stroke-width="1.6"/>`;
+  [...cells].forEach((c, i) => { if (c === '.') return; const cx = x + (i % 3 + 0.5) * z, cy = y + (Math.floor(i / 3) + 0.5) * z, hl = o.hl === i;
+    s += T(cx, cy + z * 0.24, c, { size: z * 0.66, weight: 700, color: hl ? K.focus : c === 'X' ? K.B : K.R }); });
+  if (o.win) { const [a, b] = o.win, ax = x + (a % 3 + 0.5) * z, ay = y + (Math.floor(a / 3) + 0.5) * z, bx = x + (b % 3 + 0.5) * z, by = y + (Math.floor(b / 3) + 0.5) * z;
+    s += `<line x1="${ax}" y1="${ay}" x2="${bx}" y2="${by}" stroke="${K.focus}" stroke-width="3.5" stroke-linecap="round" opacity="0.85"/>`; }
+  return s;
+}
+const LINES3 = [[0, 1, 2], [3, 4, 5], [6, 7, 8], [0, 3, 6], [1, 4, 7], [2, 5, 8], [0, 4, 8], [2, 4, 6]];
+const tttWin = b => { for (const [p, q, r] of LINES3) if (b[p] !== '.' && b[p] === b[q] && b[q] === b[r]) return b[p]; return null; };
+function tttCount() { // exhaustive: games, distinct reachable states, X wins / O wins / draws
+  const states = new Set(); let games = 0, xw = 0, ow = 0, dr = 0;
+  (function rec(b, p) { states.add(b); const w = tttWin(b); if (w || !b.includes('.')) { games++; if (w === 'X') xw++; else if (w === 'O') ow++; else dr++; return; }
+    for (let i = 0; i < 9; i++) if (b[i] === '.') rec(b.slice(0, i) + p + b.slice(i + 1), p === 'X' ? 'O' : 'X'); })('.........', 'X');
+  return { games, states: states.size, xw, ow, dr };
+}
+function tttValue(b, p, memo = new Map()) { // exact minimax value (+1 X wins)
+  const key = b + p; if (memo.has(key)) return memo.get(key);
+  const w = tttWin(b); let v;
+  if (w) v = w === 'X' ? 1 : -1; else if (!b.includes('.')) v = 0;
+  else { const vs = []; for (let i = 0; i < 9; i++) if (b[i] === '.') vs.push(tttValue(b.slice(0, i) + p + b.slice(i + 1), p === 'X' ? 'O' : 'X', memo)); v = p === 'X' ? Math.max(...vs) : Math.min(...vs); }
+  memo.set(key, v); return v;
+}
+'use strict';
+const L1 = [];
+const AIMA = () => label(layout(mk([[3, 12, 8], [2, 4, 6], [14, 5, 2]], ['max', 'min']), { x0: 80, x1: 640, y0: 92, dy: 125 }), ['A₁', 'A₂', 'A₃']);
+const nm = (root, names) => { const m = {}; nodes(root).filter(n => n.t !== 'leaf').forEach((n, i) => { m[n.id] = names[i]; }); return m; };
+const TTT = tttCount();
+
+/* ---- 6.1 ---- */
+const TAX = [['Deterministic,\nperfect information', 'Chess, checkers, Go,\ntic-tac-toe', 'Minimax, alpha–beta, MCTS'], ['Chance,\nperfect information', 'Backgammon,\nMonopoly', 'Expectiminimax'],
+  ['Deterministic,\nimperfect information', 'Kriegspiel,\nBattleship', 'Belief states'], ['Chance,\nimperfect information', 'Poker, bridge,\nScrabble', 'Sampling, equilibria']];
+L1.push({ id: '6.1', sec: '6.1 Game theory', title: 'Four kinds of games',
+  intro: 'Two questions sort every game: does chance play a part, and can each player see the whole state?',
+  steps: [
+    { c: 'The grid: columns ask whether moves are deterministic or rolled; rows ask whether information is perfect or hidden.', k: -1 },
+    { c: 'Top left is where this chapter starts: no dice, nothing hidden. Chess and Go live here, and minimax solves them in principle.', k: 0 },
+    { c: 'Add dice but keep the board visible and you get backgammon. The tree gains chance nodes, handled in Section 6.5.', k: 1 },
+    { c: 'Hide the opponent’s pieces, as in Kriegspiel, and a player must reason over every position consistent with what they have seen (Section 6.6).', k: 2 },
+    { c: 'Poker has both: shuffled cards and hidden hands. The strongest programs compute randomized equilibrium strategies.', k: 3 }],
+  draw: s => { let o = T(250, 52, 'Deterministic', { size: 15, weight: 700 }) + T(520, 52, 'Chance', { size: 15, weight: 700 }) + T(70, 140, 'Perfect\ninformation', { size: 14, weight: 700, color: K.muted }) + T(70, 300, 'Imperfect\ninformation', { size: 14, weight: 700, color: K.muted });
+    TAX.forEach(([h, g, m], i) => { const cx = i % 2 ? 390 : 125, cy = i < 2 ? 70 : 230, on = s.k === i; o += Box(cx, cy, 255, 145, { fill: on ? K.focusSoft : K.card, stroke: on ? K.focus : K.line, sw: on ? 2.6 : 1.4, op: s.k >= 0 && !on ? 0.55 : 0 });
+      o += T(cx + 128, cy + 40, g, { size: 15.5, weight: 700 }) + T(cx + 128, cy + 108, m, { size: 13.5, italic: true, color: K.muted }); });
+    return svg(o, 400); },
+  q: ['Backgammon belongs in which cell?', ['Deterministic, perfect information', 'Chance, perfect information', 'Chance, imperfect information'], 1, 'Both players see the whole board; only the dice add uncertainty.'],
+  apply: 'Auction bidding is a chance, imperfect-information game: you never see rivals’ budgets, and demand shifts randomly.',
+  note: 'Have students place a game of their choosing in the grid before showing the last step.' });
+
+const C6 = [['S₀', 'Initial state', 'the empty board; X moves first'], ['TO-MOVE(s)', 'Player to move', 'X has two marks, O one, so O moves'], ['ACTIONS(s)', 'Legal moves', 'the six empty squares'],
+  ['RESULT(s, a)', 'Transition model', 'O plays the bottom-right square'], ['IS-TERMINAL(s)', 'Terminal test', 'three in a row, or a full board'], ['UTILITY(s, p)', 'Final payoff', 'win +1, draw 0, loss −1 for X']];
+const MID = 'X.O.X....';
+L1.push({ id: '6.1.1', sec: '6.1 Game theory', title: 'A game, formally: six components',
+  intro: 'Every game in this chapter is written the same way, so one algorithm can play all of them. Tic-tac-toe shows each component.',
+  steps: C6.map((c, k) => ({ c: [`${c[0]}: the starting position. Here it is the empty board, and X moves first.`, `${c[0]}: whose turn it is. X has two marks and O has one, so O is to move.`, `${c[0]}: the legal moves. O may mark any of the six empty squares, shown dotted.`, `${c[0]}: the position after a move. O marking the bottom-right corner produces the board on the right.`, `${c[0]}: is the game over? This board is, because X has three in a diagonal.`, `${c[0]}: the payoff at the end. From X’s side, a win is +1, a draw 0 and a loss −1, and the sum for both players is always zero.`][k], k })),
+  draw: s => { let o = '';
+    C6.forEach(([f, n], i) => { const y = 34 + i * 60, on = i === s.k; o += Box(24, y, 270, 50, { fill: on ? K.focusSoft : K.card, stroke: on ? K.focus : K.line, sw: on ? 2.4 : 1.2 }) + T(40, y + 22, f, { anchor: 'start', size: 14.5, weight: 700, mono: true }) + T(40, y + 41, n, { anchor: 'start', size: 12.5, color: K.muted }); });
+    const k = s.k;
+    if (k === 0) o += Board(430, 110, '.........', { size: 66 });
+    if (k === 1) o += Board(430, 110, MID, { size: 66 }) + T(529, 360, 'O to move', { size: 17, weight: 700, color: K.R });
+    if (k === 2) { o += Board(430, 110, MID, { size: 66 }); [...MID].forEach((c, i) => { if (c === '.') o += `<circle cx="${430 + (i % 3 + .5) * 66}" cy="${110 + (Math.floor(i / 3) + .5) * 66}" r="18" fill="none" stroke="${K.R}" stroke-width="2" stroke-dasharray="4 4"/>`; }); o += T(529, 360, '6 legal moves', { size: 16, weight: 700, color: K.R }); }
+    if (k === 3) o += Board(330, 140, MID, { size: 48 }) + E([490, 212], [540, 212], { arrow: true, color: K.ink, r1: 0, r2: 0, label: 'a = corner' }) + Board(560, 140, 'X.O.X...O', { size: 48, hl: 8 });
+    if (k === 4) o += Board(430, 110, 'XOO.X...X', { size: 66, win: [0, 8] }) + T(529, 360, 'terminal: X has won', { size: 16, weight: 700, color: K.ok });
+    if (k === 5) [['XOO.X...X', '+1', [0, 8]], ['XOXXOOOXX', '0', null], ['OOOXX.X..', '−1', [0, 2]]].forEach(([b, u, w], i) => { const x = 330 + i * 130; o += Board(x, 140, b, { size: 36, win: w || undefined }) + T(x + 54, 290, u, { size: 26, weight: 700, color: i === 0 ? K.ok : i === 2 ? K.bad : K.ink }); });
+    return svg(o, 400); },
+  q: ['Which component tells the program that a position is a draw?', ['ACTIONS', 'IS-TERMINAL together with UTILITY', 'TO-MOVE'], 1, 'IS-TERMINAL says the game has ended; UTILITY assigns the drawn position its value, 0.'],
+  apply: 'General game-playing systems read these six functions for an unseen game and play it with no game-specific code.',
+  note: 'Point out that RESULT is the transition model from Chapter 3: games are search problems with an opponent.' });
+
+L1.push({ id: '6.1.1-tree', sec: '6.1 Game theory', title: 'The game tree',
+  intro: 'Expand every legal move from every position and you get the game tree. Even tic-tac-toe’s is larger than it looks.',
+  steps: [
+    { c: 'Ply 0: the root is the empty board, with MAX (X) to move. One ply is one move by one player.', k: 0 },
+    { c: 'Ply 1: X has nine moves, but by symmetry only three differ: a corner, an edge or the center.', k: 1 },
+    { c: 'Ply 2 onward: O replies, the branching shrinks by one each ply, and every path ends at a terminal board with a utility for X.', k: 2 },
+    { c: () => `Counted by this page: ${TTT.games.toLocaleString('en-US')} complete games, but only ${TTT.states.toLocaleString('en-US')} distinct positions. Many move orders reach the same board.`, k: 3 },
+    { c: () => `With perfect play by both sides the root’s minimax value is ${tttValue('.........', 'X')}: tic-tac-toe is a draw.`, k: 4 }],
+  draw: s => { let o = Board(323, 20, '.........', { size: 24 }) + T(250, 50, 'ply 0', { size: 12.5, color: K.muted, italic: true });
+    const p1 = [['X........', 140], ['.X.......', 360], ['....X....', 580]];
+    if (s.k >= 1) p1.forEach(([b, x], i) => { o += E([359, 92], [x, 128], { r1: 0, r2: 0 }) + Board(x - 36, 130, b, { size: 24, hl: s.k === 1 ? b.indexOf('X') : undefined }) + T(x, 222, ['corner ×4', 'edge ×4', 'center ×1'][i], { size: 12.5, color: K.muted }); });
+    if (s.k >= 1) o += T(60, 166, 'ply 1', { size: 12.5, color: K.muted, italic: true });
+    if (s.k >= 2) { [['XO.......', 70], ['X...O....', 210], ['.O..X....', 520], ['O...X....', 650]].forEach(([b, x], i) => { const px = i < 2 ? 140 : 580; o += E([px, 230], [x, 248], { r1: 0, r2: 0, dim: false }) + Board(x - 27, 250, b, { size: 18 }); });
+      o += T(360, 290, '⋯', { size: 30, color: K.muted }) + T(30, 280, 'ply 2', { size: 12.5, color: K.muted, italic: true });
+      [['XOO.X...X', '+1'], ['XOXXOOOXX', '0'], ['OOOXX.X..', '−1']].forEach(([b, u], i) => { const x = 200 + i * 160; o += Board(x - 27, 322, b, { size: 18 }) + T(x + 45, 352, u, { size: 18, weight: 700, color: i === 0 ? K.ok : i === 2 ? K.bad : K.ink }); });
+      o += T(60, 350, 'terminal', { size: 12.5, color: K.muted, italic: true }); }
+    if (s.k >= 3) o += Box(470, 18, 232, s.k === 4 ? 92 : 66, { fill: K.focusSoft, stroke: K.focus }) + T(586, 42, TTT.games.toLocaleString('en-US') + ' games', { size: 15, weight: 700 }) + T(586, 66, TTT.states.toLocaleString('en-US') + ' distinct positions', { size: 14 }) + (s.k === 4 ? T(586, 94, 'root value 0: a draw', { size: 14, weight: 700, color: K.ok }) : '');
+    return svg(o, 400); },
+  q: ['Why are there far fewer distinct positions than games?', ['Most games end in a draw', 'Different move orders reach the same board', 'Symmetric boards are illegal'], 1, 'X-corner then O-center reaches the same board as other orders; a game is a path, a position is a node.'],
+  apply: 'Chess programs keep a transposition table so that a position reached by two move orders is searched only once.',
+  note: 'Ask why the count of games exceeds 9! / something: games stop early when someone wins.' });
+
+/* ---- 6.2 ---- */
+L1.push({ id: '6.2', sec: '6.2 Optimal decisions', title: 'Minimax: back up the values',
+  intro: 'MAX assumes the opponent plays as well as possible. Each node takes the value its player would choose, from the leaves upward.',
+  steps: [
+    { c: 'The textbook tree: MAX at the root picks A₁, A₂ or A₃; MIN then replies; the leaves are utilities for MAX.', k: 0 },
+    { c: 'MIN at A₁ chooses among 3, 12 and 8. MIN wants MAX’s score low, so it picks 3.', k: 1 },
+    { c: 'Under A₂ the leaves are 2, 4 and 6. MIN picks 2.', k: 2 },
+    { c: 'Under A₃ sits the tempting 14, but MIN never lets MAX have it: min(14, 5, 2) is 2.', k: 3 },
+    { c: () => { const t = AIMA(), v = {}; minimax(t, v); return `MAX now chooses the largest of 3, 2 and 2. The root value is ${v[t.id]}, and the best move is ${best(t, v).edge}.`; }, k: 4 }],
+  draw: s => { const t = AIMA(), v = {}; minimax(t, v); const val = {}, hl = new Set(), path = new Set();
+    t.kids.forEach((m, i) => { if (s.k > i) val[m.id] = fmt(v[m.id]); if (s.k === i + 1) { hl.add(m.id); m.kids.filter(l => l.v === v[m.id]).forEach(l => hl.add(l.id)); } });
+    if (s.k === 4) { val[t.id] = fmt(v[t.id]); hl.add(t.id); const b = best(t, v); path.add(t.id); path.add(b.id); }
+    return svg(drawTree(t, { val, hl, path }) + Legend(150, 400, ['max', 'min', 'leaf']), 420); },
+  q: ['Why is A₃ a poor move despite its leaf of 14?', ['14 is a terminal state', 'MIN would answer with 2', 'MAX cannot reach it'], 1, 'Judge a move by what the opponent will allow, not by the best leaf beneath it.'],
+  apply: 'Worst-case planning in security: choose the defense whose weakest point, under the attacker’s best reply, is strongest.',
+  note: 'Cover the backed-up values and let students call them out level by level.' });
+
+const PC = ['function MAX-VALUE(s):', '  if IS-TERMINAL(s): return UTILITY(s)', '  v ← −∞', '  for each a in ACTIONS(s):', '    v ← max(v, MIN-VALUE(RESULT(s, a)))', '  return v',
+  'function MIN-VALUE(s):', '  if IS-TERMINAL(s): return UTILITY(s)', '  v ← +∞', '  for each a in ACTIONS(s):', '    v ← min(v, MAX-VALUE(RESULT(s, a)))', '  return v'];
+const PCS = [
+  { c: 'The search begins with MAX-VALUE at the root. Its running best, v, starts at minus infinity.', lines: [0, 2], stack: ['MAX-VALUE(root) v = −∞'], vals: {} },
+  { c: 'The loop calls MIN-VALUE on A₁’s position. That call reads the three leaves and keeps the smallest: v falls to 3.', lines: [9, 10, 11], stack: ['MAX-VALUE(root) v = −∞', 'MIN-VALUE(A₁) v = 3'], vals: { 0: 3 }, on: 0 },
+  { c: 'MIN-VALUE(A₁) returns 3. Back at the root, v becomes max(−∞, 3) = 3.', lines: [4], stack: ['MAX-VALUE(root) v = 3'], vals: { 0: 3, root: 3 } },
+  { c: 'MIN-VALUE(A₂) returns 2, which does not beat 3, so the root’s v stays 3.', lines: [4, 10], stack: ['MAX-VALUE(root) v = 3', 'MIN-VALUE(A₂) v = 2'], vals: { 0: 3, 1: 2, root: 3 }, on: 1 },
+  { c: 'MIN-VALUE(A₃) walks 14, then 5, then 2, lowering v each time, and returns 2. The root still holds 3.', lines: [10, 11], stack: ['MAX-VALUE(root) v = 3', 'MIN-VALUE(A₃) v = 14 → 5 → 2'], vals: { 0: 3, 1: 2, 2: 2, root: 3 }, on: 2 },
+  { c: 'The loop is finished. MAX-VALUE returns 3 together with the move that produced it, A₁. The stack is empty.', lines: [5], stack: [], vals: { 0: 3, 1: 2, 2: 2, root: 3 }, done: true }];
+L1.push({ id: '6.2.1', sec: '6.2 Optimal decisions', title: 'The minimax algorithm',
+  intro: 'Two mutually recursive functions walk the tree depth first. The call stack never holds more than one path.',
+  steps: PCS.map(p => ({ c: p.c, p })),
+  draw: s => { const p = s.p; let o = Box(14, 14, 372, 330, { fill: K.card }) + `<g class="mono">`;
+    PC.forEach((l, i) => { const y = 42 + i * 25, on = p.lines.includes(i); if (on) o += `<rect x="20" y="${y - 17}" width="360" height="23" rx="4" fill="${K.focusSoft}"/>`; o += T(30, y, l, { anchor: 'start', size: 12.6, mono: true, weight: on ? 700 : 500, color: i === 0 || i === 6 ? K.B : K.ink }); });
+    o += '</g>';
+    const t = label(layout(mk([[3, 12, 8], [2, 4, 6], [14, 5, 2]], ['max', 'min']), { x0: 418, x1: 700, y0: 40, dy: 95 }), ['A₁', 'A₂', 'A₃']);
+    const val = {}, hl = new Set(); t.kids.forEach((m, i) => { if (p.vals[i] !== undefined) val[m.id] = fmt(p.vals[i]); if (p.on === i) hl.add(m.id); }); if (p.vals.root !== undefined) val[t.id] = fmt(p.vals.root);
+    const path = p.done ? new Set([t.id, t.kids[0].id]) : null; if (p.done) hl.add(t.id);
+    o += drawTree(t, { val, hl, path, r: 16 });
+    o += T(560, 248 + 24, 'Call stack', { size: 13.5, weight: 700, color: K.muted });
+    if (!p.stack.length) o += T(560, 300, '(empty)', { size: 13, italic: true, color: K.muted });
+    p.stack.slice().reverse().forEach((f, i) => { o += Box(418, 282 + i * 34, 284, 28, { fill: i === 0 ? K.focusSoft : K.card, stroke: i === 0 ? K.focus : K.line }) + T(560, 301 + i * 34, f, { size: 12.5, mono: true, weight: 600 }); });
+    return svg(o, 360); },
+  q: ['How much memory does minimax need on a tree of depth m and branching b?', ['O(bᵐ)', 'O(bm)', 'O(m²)'], 1, 'Depth-first: one path of m frames, each considering up to b moves.'],
+  apply: 'The same recursion powers puzzle solvers that must prove a move works against every reply, such as chess problem checkers.',
+  note: 'Trace with students’ fingers on the stack: one frame per level, popped on return.' });
+
+const QZ = () => layout(mk([[[10, 9], [6, 5, 3]], [[-5, 2], [3], [0, -2]]], ['max', 'min', 'max']), { x0: 60, x1: 660, y0: 50, dy: 105 });
+L1.push({ id: '6.2.1-quiz', sec: '6.2 Optimal decisions', title: 'Week 4 quiz tree, worked by hand',
+  intro: 'Three levels: Player 1 (MAX), then Player 2 (MIN), then Player 1 again. Trust the leaves and compute every node yourself.',
+  steps: [
+    { c: 'Start at the bottom. The lowest MAX nodes sit just above the leaves, and each takes its largest leaf.', k: 0 },
+    { c: 'Left subtree: max(10, 9) = 10 and max(6, 5, 3) = 6.', k: 1 },
+    { c: 'Right subtree: max(−5, 2) = 2, the lone leaf gives 3, and max(0, −2) = 0.', k: 2 },
+    { c: 'Player 2 minimizes: min(10, 6) = 6 on the left and min(2, 3, 0) = 0 on the right. Taking the right branch guarantees Player 1 only 0, the quiz answer.', k: 3 },
+    { c: () => { const t = QZ(), v = {}; minimax(t, v); return `Player 1 takes max(6, 0) = ${v[t.id]}: go left. The node labels printed on the quiz figure do not follow from its leaves.`; }, k: 4 }],
+  draw: s => { const t = QZ(), v = {}; minimax(t, v); const val = {}, hl = new Set(); const [Lm, Rm] = t.kids;
+    const show = (n, on) => { val[n.id] = fmt(v[n.id]); if (on) hl.add(n.id); };
+    if (s.k >= 1) Lm.kids.forEach(n => show(n, s.k === 1)); if (s.k >= 2) Rm.kids.forEach(n => show(n, s.k === 2));
+    if (s.k >= 3) { show(Lm, s.k === 3); show(Rm, s.k === 3); } if (s.k >= 4) show(t, true);
+    const path = s.k === 4 ? new Set([t.id, Lm.id]) : null;
+    return svg(drawTree(t, { val, hl, path, r: 19 }) + T(24, 56, 'P1', { size: 12, anchor: 'start', color: K.muted }) + T(24, 161, 'P2', { size: 12, anchor: 'start', color: K.muted }) + T(24, 266, 'P1', { size: 12, anchor: 'start', color: K.muted }), 400); },
+  q: ['What does Player 1 guarantee by moving right?', ['3', '2', '0'], 2, 'Player 2 answers with the branch worth 0, the smallest of 2, 3 and 0.'],
+  apply: 'Contract negotiation with alternating offers is often analyzed with exactly this three-level backward reasoning.',
+  note: 'This is Week 4 quiz question 3. Students who copied the printed node labels should see why the leaves rule.' });
+
+L1.push({ id: '6.2.1-cost', sec: '6.2 Optimal decisions', title: 'What minimax costs',
+  intro: 'Minimax is complete and optimal, but its time grows as bᵐ. A logarithmic scale is the only way to draw it.',
+  steps: [
+    { c: 'Complete if the tree is finite; optimal against an optimal opponent, and never worse against a weaker one.', k: 0 },
+    { c: 'Time is O(bᵐ). Each bar is the number of positions a chess search visits at that depth, with b ≈ 35.', k: 1 },
+    { c: 'Depth 8 already needs over two trillion positions. A full game, m ≈ 80, needs about 10¹²³.', k: 2 },
+    { c: 'Space is only O(bm), because the search is depth first. Memory is not the problem; time is.', k: 3 }],
+  draw: s => { let o = '';
+    if (s.k === 0) { [['Complete?', 'yes, for finite trees'], ['Optimal?', 'yes, against optimal play'], ['Time', 'O(bᵐ)'], ['Space', 'O(bm)']].forEach(([a, b], i) => { o += Box(110, 40 + i * 82, 500, 64, { fill: i < 2 ? K.okSoft : K.card, stroke: i < 2 ? K.ok : K.line }) + T(140, 80 + i * 82, a, { anchor: 'start', size: 17, weight: 700 }) + T(580, 80 + i * 82, b, { anchor: 'end', size: 16 }); }); return svg(o, 400); }
+    const X0 = 90, Y0 = 350, H = 290;
+    for (let e = 0; e <= 12; e += 3) { const y = Y0 - e / 13 * H; o += `<line x1="${X0}" y1="${y}" x2="680" y2="${y}" stroke="${K.line}" stroke-width="0.8" stroke-dasharray="3 4"/>` + T(X0 - 10, y + 5, '10' + ['⁰', '³', '⁶', '⁹', '¹²'][e / 3], { anchor: 'end', size: 13, color: K.muted }); }
+    for (let d = 1; d <= 8; d++) { const n = Math.pow(35, d), h = Math.log10(n) / 13 * H, x = X0 + 20 + (d - 1) * 68, on = s.k === 2 && d === 8;
+      o += `<rect x="${x}" y="${Y0 - h}" width="46" height="${h}" fill="${on ? K.focus : K.B}" opacity="${on ? 1 : 0.75}" rx="3"/>` + T(x + 23, Y0 + 20, String(d), { size: 13 });
+      if (s.k === 2 && d === 8) o += T(x + 23, Y0 - h - 10, '≈ 2.3 × 10¹²', { size: 12.5, weight: 700 }); }
+    o += T(385, Y0 + 44, 'search depth (plies), b = 35', { size: 13, color: K.muted, italic: true });
+    if (s.k === 3) o += Box(120, 60, 300, 66, { fill: K.okSoft, stroke: K.ok }) + T(270, 88, 'memory at depth 8: about', { size: 13.5 }) + T(270, 112, '8 × 35 = 280 nodes', { size: 15, weight: 700 });
+    return svg(o, 400); },
+  q: ['Doubling the search depth does what to minimax’s running time?', ['Doubles it', 'Squares it', 'Adds b to it'], 1, 'b²ᵐ = (bᵐ)²: each extra ply multiplies the work by b.'],
+  apply: 'This growth is why every real game program trades exactness for speed: cutoffs, pruning and evaluation functions.',
+  note: 'Ask: if a machine searches a billion positions a second, how deep can it go in a 3-minute move?' });
+
+const MP = () => { const t = layout(mk([[[{ v: [1, 2, 6] }, { v: [4, 2, 3] }], [{ v: [6, 1, 2] }, { v: [7, 4, 1] }]], [[{ v: [5, 1, 1] }, { v: [1, 5, 2] }], [{ v: [7, 7, 1] }, { v: [5, 4, 5] }]]], ['a', 'b', 'c']), { x0: 58, x1: 662, y0: 48, dy: 98 }); return t; };
+L1.push({ id: '6.2.2', sec: '6.2 Optimal decisions', title: 'Three players: utility vectors',
+  intro: 'With more than two players a single number is not enough. Each leaf holds one utility per player, and each player looks only at its own entry.',
+  steps: [
+    { c: 'Players A, B and C move in turn. Each leaf is a vector (A’s utility, B’s, C’s).', k: 0 },
+    { c: 'C moves at the bottom and compares only the third entries. From (1, 2, 6) and (4, 2, 3), C keeps (1, 2, 6) because 6 beats 3.', k: 1 },
+    { c: 'B compares second entries. On the left, (1, 2, 6) beats (6, 1, 2); on the right, (1, 5, 2) beats (5, 4, 5).', k: 2 },
+    { c: () => { const t = MP(), v = {}; vecMinimax(t, [0, 1, 2], 0, v); return `A compares first entries; both are 1, and the first one wins the tie. The root’s backed-up vector is ${fmt(v[t.id])}.`; }, k: 3 },
+    { c: 'Real multiplayer games add alliances: weak players may gang up on the leader, then turn on each other once that stops paying.', k: 4 }],
+  draw: s => { const t = MP(), v = {}; vecMinimax(t, [0, 1, 2], 0, v); const lvl = { a: 0, b: 1, c: 2 }; let o = '';
+    nodes(t).forEach(n => { if (n.t !== 'leaf') n.kids.forEach(k => { const on = s.k >= 1 && n.choice === k.id && lvl[n.t] >= 3 - s.k; o += E([n.x, n.y], [k.x, k.y], { r1: 20, r2: 22, color: on ? K.focus : K.line, w: on ? 3.2 : 2 }); }); });
+    nodes(t).forEach(n => { if (n.t === 'leaf') { o += Box(n.x - 34, n.y - 14, 68, 28, { fill: K.soft }) + T(n.x, n.y + 5, fmt(n.v), { size: 12.5, weight: 700 }); return; }
+      const shown = lvl[n.t] >= 3 - s.k && s.k >= 1, col = [K.B, K.G, K.R][lvl[n.t]];
+      o += N(n.x, n.y, n.t.toUpperCase(), { r: 20, fill: col, ring: shown && lvl[n.t] === 3 - s.k ? K.focus : null });
+      if (shown) o += Box(n.x + 26, n.y - 13, 68, 26, { fill: K.focusSoft, stroke: K.focus }) + T(n.x + 60, n.y + 5, fmt(v[n.id]), { size: 12, weight: 700 }); });
+    if (s.k === 4) o += Box(130, 364, 460, 42, { fill: K.focusSoft, stroke: K.focus }) + T(360, 381, 'A and B both trail C, so each gains by opposing C:', { size: 12.5 }) + T(360, 398, 'an alliance that forms without any agreement', { size: 12.5 });
+    return svg(o, 414); },
+  q: ['At a node where B moves, which entry of each vector does B compare?', ['The first', 'The second', 'The sum'], 1, 'Each player maximizes its own component; B owns the second.'],
+  apply: 'Multi-party settings such as three-way bidding wars or coalition politics are modeled with utility vectors, not a single score.',
+  note: 'The figure follows the textbook’s three-player example; its root value is (1, 2, 6).' });
+
+/* ---- 6.2.3 alpha-beta ---- */
+L1.push({ id: '6.2.3', sec: '6.2 Optimal decisions', title: 'Alpha–beta: some branches cannot matter',
+  intro: 'Alpha–beta returns exactly the minimax value while skipping branches that cannot change the decision.',
+  steps: [
+    { c: 'After exploring A₁, MAX knows it can guarantee 3.', k: 0 },
+    { c: 'The first leaf under A₂ is 2. MIN would never let A₂ be worth more than 2, so A₂ is at most 2.', k: 1 },
+    { c: 'MAX already has 3, and A₂ can give at most 2. Whatever the remaining two leaves are, A₂ will not be chosen.', k: 2 },
+    { c: 'So they are never examined. The prune is safe for any values hidden there; the 4 and 6 do not matter.', k: 3 }],
+  draw: s => { const t = AIMA(), v = {}; minimax(t, v); const [B, C] = t.kids; const val = { [B.id]: '3' }, hl = new Set(), pr = new Set();
+    if (s.k === 0) { hl.add(B.id); val[t.id] = '≥3'; } else val[t.id] = '≥3';
+    if (s.k >= 1) { val[C.id] = '≤2'; hl.add(C.id); hl.add(C.kids[0].id); }
+    if (s.k >= 2) [1, 2].forEach(i => { pr.add(C.kids[i].id); });
+    const vals = s.k === 3 ? val : Object.assign({}, val, s.k >= 2 ? { [C.kids[1].id]: '?', [C.kids[2].id]: '?' } : {});
+    let o = drawTree(t, { val: vals, hl, pr: s.k >= 2 ? pr : new Set() });
+    if (s.k >= 2) o += Box(360, 20, 330, 52, { fill: K.focusSoft, stroke: K.focus }) + T(525, 51, 'MAX has 3 ≥ A₂’s ceiling of 2: prune', { size: 14, weight: 600 });
+    return svg(o + Legend(150, 400, ['max', 'min', 'leaf']), 420); },
+  q: ['Could the pruned leaves have been 100?', ['Yes, and alpha–beta would still be right', 'No, alpha–beta would then be wrong', 'Only if they were negative'], 0, 'MIN already has 2 at A₂; a 100 would only be ignored by MIN. A₂ stays ≤ 2.'],
+  apply: 'Any optimizer with a bound can prune this way: branch-and-bound in scheduling cuts a partial plan once it is worse than the best found.',
+  note: 'Ask students to argue the safety of the prune before the last step.' });
+
+const abState = (t, ev, k) => { // reconstruct picture after k events
+  const val = {}, ab = {}, pr = new Set(); let cur = null;
+  for (let i = 0; i <= k; i++) { const e = ev[i]; cur = e;
+    if (e.kind === 'enter') ab[e.id] = [e.a, e.b];
+    if (e.kind === 'update') { const n = nodes(t).find(x => x.id === e.id); val[e.id] = (n.t === 'max' ? '≥' : '≤') + fmt(e.v); ab[e.id] = [e.a, e.b]; }
+    if (e.kind === 'leaf') val[e.id] = fmt(e.v);
+    if (e.kind === 'prune') { const n = nodes(t).find(x => x.id === e.id); val[e.id] = (n.t === 'max' ? '≥' : '≤') + fmt(e.v); e.rest.forEach(r => pr.add(r)); ab[e.id] = [e.a, n.t === 'min' ? e.v : e.b]; }
+    if (e.kind === 'return') val[e.id] = fmt(e.v); }
+  return { val, ab, pr, cur };
+};
+const Window = (a, b, y = 408) => { const X = v => v === -Infinity ? 90 : v === Infinity ? 630 : 120 + (v - 0) * 30; let o = `<line x1="90" y1="${y}" x2="630" y2="${y}" stroke="${K.line}" stroke-width="2"/>`;
+  for (let v = 0; v <= 16; v += 2) o += `<line x1="${X(v)}" y1="${y - 4}" x2="${X(v)}" y2="${y + 4}" stroke="${K.line}"/>` + T(X(v), y + 20, String(v), { size: 11, color: K.muted });
+  o += `<rect x="${X(a)}" y="${y - 9}" width="${Math.max(2, X(b) - X(a))}" height="18" fill="${K.focus}" opacity="0.35" rx="3"/>` + T(X(a), y - 14, 'α ' + fmt(a), { size: 12.5, weight: 700, color: K.B }) + T(X(b), y - 14, 'β ' + fmt(b), { size: 12.5, weight: 700, color: K.R });
+  return o + T(660, y + 5, 'window', { size: 12, anchor: 'start', italic: true, color: K.muted }); };
+function abLesson(id, title, intro, mkT, names, extra) {
+  const t0 = mkT(), run = alphaBeta(t0), keep = run.ev.map((e, i) => i).filter(i => ['leaf', 'prune', 'return'].includes(run.ev[i].kind));
+  const name = nm(t0, names), leafName = id => { const l = leaves(t0).find(x => x.id === id); return 'leaf ' + fmt(l.v); };
+  const typ = id => nodes(t0).find(x => x.id === id).t, parOf = id => nodes(t0).find(x => x.kids && x.kids.some(k => k.id === id));
+  const cap = (e, i) => { const n = name[e.id], ne = run.ev[i + 1] || {};
+    if (e.kind === 'leaf') { const p = parOf(e.id), who = typ(p.id) === 'min' ? 'MIN' : 'MAX', bound = who === 'MIN' ? 'β' : 'α', head = `Leaf ${fmt(e.v)} under ${name[p.id]}, window [${fmt(e.a)}, ${fmt(e.b)}]. `;
+      if (ne.kind === 'prune') return head + `${name[p.id]} drops to ${fmt(e.v)}, which is outside the window.`;
+      if (ne.kind === 'update' && ne.v === e.v) return head + `${who} now holds ${fmt(e.v)}, so ${bound} becomes ${fmt(who === 'MIN' ? ne.b : ne.a)}.`;
+      return head + `${fmt(e.v)} is no better for ${who} than ${fmt(ne.v)}; the window is unchanged.`; }
+    if (e.kind === 'prune') { if (!e.rest.length) return `${n} ends at ${fmt(e.v)}, not above α = ${fmt(e.a)}. Its last leaf was needed, so there is nothing left to cut.`;
+      const pv = e.rest.map(r => fmt(leaves(t0).find(l => l.id === r).v)).join(' and '); return `Since ${fmt(e.v)} ≤ α = ${fmt(e.a)}, MAX will never pick ${n}. Prune: ${pv} ${e.rest.length > 1 ? 'are' : 'is'} never read.`; }
+    if (n === names[0]) return `The root returns ${fmt(e.v)} and plays ${t0.kids.find(k => !run.pruned.has(k.id) && run.ev.some(x => x.kind === 'return' && x.id === k.id && x.v === e.v)).edge}. Leaves examined: ${run.seen.length} of ${leaves(t0).length}.`;
+    return ne.kind === 'update' && ne.a === e.v ? `${n} is fully explored and returns ${fmt(e.v)}; the root raises α to ${fmt(ne.a)}.` : `${n} returns ${fmt(e.v)}; the root’s α stays ${fmt(ne.a)}.`; };
+  L1.push({ id, sec: '6.2 Optimal decisions', title, intro,
+    steps: keep.map(i => ({ c: cap(run.ev[i], i), i })),
+    draw: s => { const t = mkT(), { ev } = alphaBeta(t), st = abState(t, ev, s.i), e = st.cur, side = {};
+      if (e.kind === 'leaf') { const p = nodes(t).find(x => x.kids && x.kids.some(k => k.id === e.id)); side[p.id] = [`α ${fmt(e.a)}  β ${fmt(e.b)}`, 'new']; }
+      else if (st.ab[e.id]) side[e.id] = [`α ${fmt(st.ab[e.id][0])}  β ${fmt(st.ab[e.id][1])}`, 'new'];
+      const hl = new Set([e.id]); let o = drawTree(t, { val: st.val, hl, pr: st.pr, side, sideDy: -64 });
+      const w = e.kind === 'leaf' ? [e.a, e.b] : st.ab[e.id] || [-Infinity, Infinity]; o += Window(w[0], w[1]);
+      return svg(o + (extra ? extra(s, t) : ''), 440); },
+    q: ['When does a MIN node prune its remaining children?', ['When its value v ≤ α', 'When v ≥ β', 'When it has seen half its children'], 0, 'MAX above already has α; a MIN value at or below α will never be chosen.'],
+    apply: 'Database query optimizers use the same idea: once a partial plan costs more than the best complete plan, stop costing it.',
+    note: 'Students should keep their own α/β table and check it against each step.' });
+}
+abLesson('6.2.3-trace', 'Alpha–beta, traced with α and β', 'Each node carries a window [α, β] of values that could still matter. Watch it narrow until a node falls outside it.', AIMA, ['root', 'A₁', 'A₂', 'A₃']);
+abLesson('6.2.3-practice', 'Practice: your own alpha–beta trace', 'Same shape, new leaves. Predict each step before advancing: root value, pruned leaves, chosen move.', () => label(layout(mk([[6, 11, 4], [2, 7, 5], [1, 8, 9]], ['max', 'min']), { x0: 80, x1: 640, y0: 92, dy: 125 }), ['B₁', 'B₂', 'B₃']), ['root', 'B₁', 'B₂', 'B₃']);
+
+/* ---- 6.2.4 move ordering ---- */
+const ORD = [['the textbook order', [[3, 12, 8], [2, 4, 6], [14, 5, 2]]], ['worst first everywhere', [[6, 4, 2], [14, 5, 2], [12, 8, 3]]], ['best first everywhere', [[3, 12, 8], [2, 4, 6], [2, 5, 14]]]];
+L1.push({ id: '6.2.4', sec: '6.2 Optimal decisions', title: 'Move ordering decides how much you prune',
+  intro: 'Alpha–beta prunes most when the best moves are examined first. Same tree, same answer; only the order changes.',
+  steps: [
+    ...ORD.map(([n, sp], k) => ({ c: () => { const r = alphaBeta(mk(sp, ['max', 'min'])); return `${['Start with', 'Now try', 'Finally,'][k]} ${n}: alpha–beta reads ${r.seen.length} of 9 leaves and returns ${r.value}${k === 1 ? '. Nothing is pruned' : k === 2 ? ', the fewest possible here' : ''}.`; }, k })),
+    { c: 'In theory: no pruning gives O(bᵐ), random order about O(b^(3m/4)), and perfect order O(b^(m/2)). With b = 35 the effective branching factor falls to about 6.', k: 3 }],
+  draw: s => { let o = '';
+    if (s.k < 3) { const sp = ORD[s.k][1]; const t = layout(mk(sp, ['max', 'min']), { x0: 80, x1: 640, y0: 60, dy: 115 }); const r = alphaBeta(t); const v = {}; minimax(t, v); const val = {}; t.kids.forEach(k => { if (!r.pruned.has(k.id)) val[k.id] = fmt(v[k.id]); }); val[t.id] = fmt(r.value);
+      o += drawTree(t, { val, pr: r.pruned, r: 20 }) + Box(220, 340, 280, 50, { fill: K.focusSoft, stroke: K.focus }) + T(360, 371, `${r.seen.length} leaves read, ${9 - r.seen.length} pruned`, { size: 16, weight: 700 }); return svg(o, 400); }
+    const rows = [['no pruning', 'bᵐ', 1], ['random order', 'b^(3m/4)', 0.75], ['perfect order', 'b^(m/2)', 0.5]], m = 8, b = 35, full = Math.log10(Math.pow(b, m));
+    rows.forEach(([n, f, e], i) => { const v = Math.log10(Math.pow(b, m * e)), w = v / full * 420, y = 80 + i * 90;
+      o += T(40, y + 24, n, { anchor: 'start', size: 15, weight: 700 }) + T(40, y + 46, f, { anchor: 'start', size: 13, color: K.muted, mono: true }) + `<rect x="200" y="${y + 8}" width="${w}" height="34" rx="4" fill="${i === 2 ? K.ok : K.B}" opacity="0.8"/>` + T(210 + w, y + 31, '≈ 10^' + v.toFixed(1), { anchor: 'start', size: 13.5, weight: 700 }); });
+    o += T(360, 360, 'positions at depth 8 with b = 35 (logarithmic bar length)', { size: 13, italic: true, color: K.muted });
+    return svg(o, 400); },
+  q: ['With perfect move ordering, how deep can alpha–beta search in the time minimax needs for depth d?', ['About d', 'About 2d', 'About d²'], 1, 'b^(m/2) nodes at depth m: the same budget reaches twice the depth.'],
+  apply: 'Chess engines spend real effort just on ordering moves, because good order roughly doubles their reachable depth.',
+  note: 'Let students propose an ordering that prunes nothing, then check it in the second step.' });
+
+L1.push({ id: '6.2.4-tricks', sec: '6.2 Optimal decisions', title: 'How programs find a good order',
+  intro: 'Nobody knows the best move in advance, so engines guess it cheaply from earlier work.',
+  steps: [
+    { c: 'Forcing moves first: try captures, checks and threats before quiet moves, because they most often refute a line.', k: 0 },
+    { c: 'Killer moves: a move that caused a cutoff at this depth in a sibling branch is tried early here too.', k: 1 },
+    { c: 'Iterative deepening: search to depth 1, 2, 3 and so on. Each pass ranks the moves for the next, deeper one.', k: 2 },
+    { c: 'Transposition table: two move orders reaching one position share a single stored result instead of being searched twice.', k: 3 }],
+  draw: s => { let o = '';
+    if (s.k === 0) { const mv = [['Q×d7+', 'capture with check', 1], ['N×e5', 'capture', 1], ['Rd1', 'threat', 1], ['h3', 'quiet', 0], ['a4', 'quiet', 0], ['Kh1', 'quiet', 0]];
+      mv.forEach(([m, k, f], i) => { o += Box(180, 30 + i * 56, 360, 44, { fill: f ? K.focusSoft : K.card, stroke: f ? K.focus : K.line }) + T(215, 58 + i * 56, String(i + 1), { size: 14, color: K.muted }) + T(250, 58 + i * 56, m, { anchor: 'start', size: 16, weight: 700, mono: true }) + T(520, 58 + i * 56, k, { anchor: 'end', size: 13.5, color: K.muted, italic: true }); }); }
+    if (s.k === 1) { const t = layout(mk([[[1, 2], [3, 4]], [[5, 6], [7, 8]]], ['max', 'min', 'max']), { x0: 80, x1: 640, y0: 60, dy: 110 }); const a = t.kids[0].kids[0], b = t.kids[1].kids[0];
+      o += drawTree(t, { val: Object.fromEntries(leaves(t).map(l => [l.id, ''])), hl: new Set([a.id, b.id]), r: 18 }) + T(a.x, 330, 'Ng5 cut off here', { size: 13, weight: 700, color: K.focus }) + T(b.x, 330, 'so try Ng5 first here', { size: 13, weight: 700, color: K.focus }) + E([a.x + 62, 326], [b.x - 76, 326], { arrow: true, color: K.focus, r1: 0, r2: 0, dash: true }); }
+    if (s.k === 2) [1, 2, 3].forEach((d, i) => { const x = 50 + i * 225; o += Box(x, 60, 200, 260, { fill: K.card }) + T(x + 100, 90, 'depth ' + d, { size: 15, weight: 700 });
+      const order = [['e4', 'd4', 'Nf3', 'c4'], ['d4', 'e4', 'c4', 'Nf3'], ['d4', 'c4', 'e4', 'Nf3']][i]; order.forEach((m, j) => { o += Box(x + 30, 110 + j * 48, 140, 36, { fill: j === 0 ? K.focusSoft : K.soft, stroke: j === 0 ? K.focus : K.line }) + T(x + 100, 134 + j * 48, m, { size: 14.5, weight: j === 0 ? 700 : 500, mono: true }); });
+      if (i < 2) o += E([x + 202, 190], [x + 222, 190], { arrow: true, r1: 0, r2: 0, color: K.ink }); });
+    if (s.k === 3) { o += Board(310, 14, '.........', { size: 32 });
+      [['X........', 120, 'X top-left first'], ['........X', 520, 'X bottom-right first']].forEach(([b, x, l]) => { o += E([358, 112], [x + 48, 135], { r1: 0, r2: 0 }) + Board(x, 138, b, { size: 32 }) + T(x + 48, 252, l, { size: 12.5, italic: true, color: K.muted }) + E([x + 48, 262], [358, 292], { r1: 0, r2: 0, color: K.focus, w: 3 }); });
+      o += Board(310, 296, 'X...O...X', { size: 32 }) + T(296, 336, 'same position,', { size: 14, weight: 700, color: K.focus, anchor: 'end' }) + T(296, 356, 'one stored result', { size: 14, weight: 700, color: K.focus, anchor: 'end' }); }
+    return svg(o, 410); },
+  q: ['Why does iterative deepening not waste much time repeating shallow searches?', ['Shallow searches are skipped', 'The deepest level dominates the cost, and the shallow passes improve ordering', 'It searches in parallel'], 1, 'With branching b, the last level holds almost all nodes; earlier passes are cheap and buy better ordering.'],
+  apply: 'Caching repeated sub-results, as transposition tables do, is the same idea as memoization in dynamic programming.',
+  note: 'The killer-move figure is schematic; the move names illustrate the idea.' });
+'use strict';
+const L2 = [];
+/* ---- 6.3 heuristic alpha-beta ---- */
+const CUT = () => layout(mk([[[4, 7], [9, 2]], [[3, 1], [8, 6]], [[5, 9], [7, 3]]], ['max', 'min', 'max']), { x0: 50, x1: 670, y0: 50, dy: 105 });
+L2.push({ id: '6.3', sec: '6.3 Heuristic search', title: 'Cut off the search and estimate',
+  intro: 'Real games are too deep to search to the end. Stop at a fixed depth and let an evaluation function estimate the positions there.',
+  steps: [
+    { c: 'The true tree continues far below what fits in the time limit; the faded level stands for everything we cannot reach.', k: 0 },
+    { c: 'IS-CUTOFF(s, d) replaces IS-TERMINAL: here the search stops at depth 2, marked by the dashed line.', k: 1 },
+    { c: 'EVAL(s) replaces UTILITY at the frontier. These numbers are estimates of how good each position is for MAX.', k: 2 },
+    { c: () => { const t = CUT(); t.kids.forEach(m => m.kids.forEach(x => { x.t = 'leaf'; x.v = Math.max(...x.kids.map(l => l.v)) - 1; delete x.kids; })); const v = {}; minimax(t, v); return `Back the estimates up exactly as in minimax. This is H-MINIMAX; here the root is worth ${v[t.id]}, an estimate rather than a proof.`; }, k: 3 }],
+  draw: s => { const t = CUT(); let o = '';
+    if (s.k === 0) return svg(drawTree(t, { r: 18, dimOthers: false, val: Object.fromEntries(leaves(t).map(l => [l.id, '?'])) }) + `<rect x="0" y="300" width="720" height="80" fill="${K.paper}" opacity="0.55"/>` + T(360, 400, 'far deeper than we can afford to search', { size: 13.5, italic: true, color: K.muted }), 420);
+    t.kids.forEach(m => m.kids.forEach(x => { x.est = Math.max(...x.kids.map(l => l.v)) - 1; x.t = 'leaf'; x.v = x.est; delete x.kids; }));
+    layout(t, { x0: 80, x1: 640, y0: 60, dy: 130 });
+    const v = {}; minimax(t, v); const val = {}; leaves(t).forEach(l => { val[l.id] = s.k >= 2 ? fmt(l.v) : ''; });
+    if (s.k === 3) nodes(t).forEach(n => { val[n.id] = fmt(v[n.id]); });
+    o += drawTree(t, { val, r: 20, hl: s.k === 2 ? new Set(leaves(t).map(l => l.id)) : s.k === 3 ? new Set([t.id]) : new Set() });
+    o += `<line x1="30" y1="${t.kids[0].kids[0].y - 34}" x2="690" y2="${t.kids[0].kids[0].y - 34}" stroke="${K.focus}" stroke-width="2.5" stroke-dasharray="8 6"/>` + T(690, t.kids[0].kids[0].y - 42, 'cutoff: depth 2', { anchor: 'end', size: 13, weight: 700, color: K.focus });
+    if (s.k >= 2) o += T(360, 380, s.k === 2 ? 'EVAL(s) at every frontier position' : 'H-MINIMAX: the same backing up, applied to estimates', { size: 14, italic: true, color: K.muted });
+    return svg(o, 410); },
+  q: ['What replaces UTILITY in heuristic minimax?', ['IS-CUTOFF', 'EVAL', 'ACTIONS'], 1, 'At a cutoff position the game is not over, so EVAL estimates its value.'],
+  apply: 'Any planner on a deadline, such as a delivery-routing system replanning every minute, searches a few steps ahead and scores the rest heuristically.',
+  note: 'Frontier estimates here are made up for illustration; the backing-up is computed.' });
+
+const PV = { '♙': 1, '♘': 3, '♗': 3, '♖': 5, '♕': 9, '♟': 1, '♞': 3, '♝': 3, '♜': 5, '♛': 9 };
+const POS = { a1: '♖', c3: '♘', e1: '♔', d1: '♕', f2: '♙', g2: '♙', h2: '♙', a8: '♜', e8: '♚', d8: '♛', f7: '♟', g7: '♟' };
+const mat = side => Object.values(POS).filter(p => (side === 'w' ? '♙♘♗♖♕' : '♟♞♝♜♛').includes(p)).reduce((s, p) => s + PV[p], 0);
+const Chess = (x, y, z, hl = []) => { let o = ''; for (let r = 0; r < 8; r++) for (let f = 0; f < 8; f++) { const sq = 'abcdefgh'[f] + (8 - r), dark = (r + f) % 2;
+  o += `<rect x="${x + f * z}" y="${y + r * z}" width="${z}" height="${z}" fill="${hl.includes(sq) ? K.focusSoft : dark ? K.line : K.card}" opacity="${dark && !hl.includes(sq) ? 0.55 : 1}"/>`; if (POS[sq]) o += T(x + f * z + z / 2, y + r * z + z * 0.78, POS[sq], { size: z * 0.82, weight: 400 }); }
+  return o + `<rect x="${x}" y="${y}" width="${8 * z}" height="${8 * z}" fill="none" stroke="${K.ink}" stroke-width="1.5"/>`; };
+L2.push({ id: '6.3.1', sec: '6.3 Heuristic search', title: 'Evaluation functions',
+  intro: 'A good EVAL agrees with the true result at the end of the game, runs fast, and tracks the real chance of winning everywhere else.',
+  steps: [
+    { c: 'The classic chess feature is material: pawn 1, knight or bishop 3, rook 5, queen 9.', k: 0 },
+    { c: () => `Count it on this position: White has ${mat('w')} points and Black has ${mat('b')}, so the material feature is ${mat('w') - mat('b') > 0 ? '+' : ''}${mat('w') - mat('b')} for White: a knight and a pawn.`, k: 1 },
+    { c: 'A weighted linear EVAL adds many such features: w₁f₁(s) + w₂f₂(s) + … Weights once came from experts; today they are learned.', k: 2 },
+    { c: () => `What EVAL estimates: if positions like this one win 72%, lose 20% and draw 8% of the time, the expected value is ${(0.72 - 0.20).toFixed(2)}.`, k: 3 }],
+  draw: s => { let o = Chess(30, 30, 42, s.k === 1 ? ['c3', 'h2'] : []);
+    if (s.k === 0) [['♙', 'pawn', 1], ['♘', 'knight', 3], ['♗', 'bishop', 3], ['♖', 'rook', 5], ['♕', 'queen', 9]].forEach(([g, n, v], i) => { o += T(420, 80 + i * 58, g, { size: 34, weight: 400 }) + T(460, 74 + i * 58, n, { anchor: 'start', size: 15 }) + `<rect x="540" y="${58 + i * 58}" width="${v * 15}" height="20" rx="3" fill="${K.B}" opacity="0.8"/>` + T(548 + v * 15, 74 + i * 58, String(v), { anchor: 'start', size: 14, weight: 700 }); });
+    if (s.k === 1) o += Box(410, 70, 280, 200, { fill: K.card }) + T(550, 110, `White  ${mat('w')}`, { size: 18 }) + T(550, 150, `Black  ${mat('b')}`, { size: 18 }) + `<line x1="450" y1="170" x2="650" y2="170" stroke="${K.ink}"/>` + T(550, 210, `material  +${mat('w') - mat('b')}`, { size: 20, weight: 700, color: K.ok }) + T(550, 245, 'kings are not counted', { size: 12.5, italic: true, color: K.muted });
+    if (s.k === 2) { const F = [['material', 4, 1.0], ['mobility', 6, 0.1], ['king safety', -1, 0.5], ['pawn structure', 1, 0.3]]; let tot = 0;
+      F.forEach(([n, f, w], i) => { tot += f * w; o += T(410, 80 + i * 52, n, { anchor: 'start', size: 15 }) + T(690, 80 + i * 52, `${w} × ${fmt(f)} = ${fmt(+(w * f).toFixed(1))}`, { anchor: 'end', size: 14, mono: true }); });
+      o += `<line x1="410" y1="${80 + 4 * 52 - 24}" x2="690" y2="${80 + 4 * 52 - 24}" stroke="${K.ink}"/>` + T(690, 80 + 4 * 52 + 6, 'EVAL = ' + fmt(+tot.toFixed(1)), { anchor: 'end', size: 18, weight: 700 }) + T(550, 340, 'illustrative feature values and weights', { size: 12.5, italic: true, color: K.muted }); }
+    if (s.k === 3) { const parts = [['win', 0.72, K.ok, 1], ['draw', 0.08, K.line, 0], ['loss', 0.20, K.bad, -1]]; let x = 410;
+      parts.forEach(([n, p, c, u]) => { const w = p * 280; o += `<rect x="${x}" y="110" width="${w}" height="46" fill="${c}"/>` + (p > 0.1 ? T(x + w / 2, 139, `${Math.round(p * 100)}%`, { size: 14, weight: 700, color: '#fff' }) : '') + T(x + w / 2, 180, n, { size: 12.5, color: K.muted }); x += w; });
+      o += T(550, 240, '0.72(+1) + 0.08(0) + 0.20(−1)', { size: 14, mono: true }) + T(550, 285, '= ' + (0.72 - 0.20).toFixed(2), { size: 24, weight: 700 }); }
+    return svg(o, 400); },
+  q: ['Why must EVAL be fast?', ['It runs only once per game', 'Time spent evaluating is time not spent searching deeper', 'Slow functions are inaccurate'], 1, 'An evaluation as costly as one more ply of search buys nothing.'],
+  apply: 'Credit scoring is a weighted evaluation function: features of an applicant, weighted and summed into one estimate of risk.',
+  note: 'Mention that a linear sum assumes independent features; the bishop pair is the classic counterexample.' });
+
+const PLY = (x, y, n, hz, marks) => { let o = ''; for (let i = 0; i <= n; i++) { const cx = x + i * 56, beyond = i > hz;
+  o += `<circle cx="${cx}" cy="${y}" r="15" fill="${beyond ? K.soft : K.card}" stroke="${beyond ? K.line : K.ink}" stroke-width="1.6"${beyond ? ' stroke-dasharray="4 3"' : ''}/>` + T(cx, y + 5, String(i), { size: 12.5, color: beyond ? K.muted : K.ink }); if (i < n) o += `<line x1="${cx + 15}" y1="${y}" x2="${cx + 41}" y2="${y}" stroke="${K.line}" stroke-width="2"/>`; }
+  o += `<line x1="${x + hz * 56 + 28}" y1="${y - 46}" x2="${x + hz * 56 + 28}" y2="${y + 42}" stroke="${K.focus}" stroke-width="3" stroke-dasharray="7 5"/>` + T(x + hz * 56 + 28, y - 54, 'horizon', { size: 13, weight: 700, color: K.focus });
+  (marks || []).forEach(([i, t, c]) => { o += T(x + i * 56, y + 40, t, { size: 12, weight: 700, color: c || K.ink }); }); return o; };
+L2.push({ id: '6.3.2', sec: '6.3 Heuristic search', title: 'The horizon effect and quiescence',
+  intro: 'A fixed depth limit is a horizon. Whatever happens just beyond it is invisible, and a program can be fooled into hiding a loss there.',
+  steps: [
+    { c: 'MAX’s bishop is trapped and will be captured at ply 3. A depth-4 search sees the loss.', k: 0 },
+    { c: 'The program finds delaying moves: pawn sacrifices that give check. Each one pushes the capture two plies later.', k: 1 },
+    { c: 'After two checks the capture lands at ply 7, beyond the horizon. The search reports the bishop as saved and the pawns as well spent. Both are wrong.', k: 2 },
+    { c: 'Quiescence search keeps going past the horizon, usually only through captures, until the position is quiet. The hidden capture comes back into view.', k: 3 }],
+  draw: s => { let o = '';
+    if (s.k === 0) o += PLY(70, 180, 9, 4, [[3, 'bishop lost', K.bad]]);
+    if (s.k === 1) o += PLY(70, 180, 9, 4, [[1, 'pawn check', K.B], [3, 'pawn check', K.B], [5, 'bishop lost', K.bad]]);
+    if (s.k === 2) o += PLY(70, 180, 9, 4, [[1, 'pawn check', K.B], [3, 'pawn check', K.B], [7, 'bishop lost', K.bad]]) + Box(110, 280, 500, 54, { fill: K.badSoft, stroke: K.bad }) + T(360, 313, 'search sees: two pawns down, bishop safe', { size: 15, weight: 700, color: K.bad });
+    if (s.k === 3) { o += PLY(70, 180, 9, 4, [[1, 'pawn check', K.B], [3, 'pawn check', K.B], [7, 'bishop lost', K.bad]]); o += `<rect x="${70 + 4 * 56 + 30}" y="150" width="${3 * 56 + 20}" height="60" rx="10" fill="${K.ok}" opacity="0.14"/>` + T(70 + 6 * 56, 270, 'quiescence: follow captures', { size: 14, weight: 700, color: K.ok }) + T(70 + 6 * 56, 292, 'until nothing hangs', { size: 14, weight: 700, color: K.ok }); }
+    return svg(o + T(360, 380, 'plies from the current position', { size: 13, italic: true, color: K.muted }), 400); },
+  q: ['What does quiescence search add?', ['A deeper search of every move', 'Extra search through unstable positions, usually captures', 'A random playout'], 1, 'Only noisy positions are extended, so the cost stays small.'],
+  apply: 'Budget forecasts with a fixed window show the same bias: deferring a cost past the window makes a plan look cheaper than it is.',
+  note: 'Singular extensions are the other remedy: search a clearly forced move one ply deeper.' });
+
+const FP = [['Nf3', 0.9], ['d4', 0.8], ['e4', 0.75], ['c4', 0.5], ['g3', 0.3], ['b3', 0.1], ['a3', -0.2], ['h4', -0.6]];
+L2.push({ id: '6.3.3', sec: '6.3 Heuristic search', title: 'Forward pruning',
+  intro: 'Alpha–beta prunes only what is provably irrelevant. Forward pruning goes further and skips moves that merely look bad, a risk taken for speed.',
+  steps: [
+    { c: 'Rank the moves with a cheap shallow evaluation. Here eight candidates are sorted from best to worst.', k: 0 },
+    { c: 'Beam search keeps only the best k, here three, and never looks at the rest.', k: 1 },
+    { c: 'Late move reduction is gentler: moves late in the order are searched less deeply instead of not at all, and re-searched if they surprise.', k: 2 },
+    { c: 'The danger: a move that looks poor at shallow depth but wins deeper, such as a sacrifice, can be thrown away.', k: 3 }],
+  draw: s => { let o = ''; FP.forEach(([m, v], i) => { const y = 34 + i * 44, keep = s.k === 0 || (s.k === 1 ? i < 3 : true), red = s.k === 2 && i >= 3, risky = s.k === 3 && m === 'g3';
+    o += Box(150, y, 140, 36, { fill: risky ? K.focusSoft : keep ? K.card : K.soft, stroke: risky ? K.focus : K.line, op: keep ? 0 : 0.5 }) + T(220, y + 24, m, { size: 15, weight: 700, mono: true, color: keep ? K.ink : K.muted });
+    const w = (v + 0.7) * 160; o += `<rect x="310" y="${y + 9}" width="${w}" height="18" rx="3" fill="${v >= 0 ? K.B : K.R}" opacity="${keep ? 0.8 : 0.25}"/>` + T(318 + w, y + 23, (v > 0 ? '+' : '') + v.toFixed(1), { anchor: 'start', size: 12.5, color: K.muted });
+    if (s.k === 1 && i >= 3) o += T(120, y + 24, '✂', { size: 17, color: K.bad });
+    if (red) o += T(622, y + 23, 'shallower', { size: 12.5, italic: true, color: K.muted, anchor: 'start' }); if (s.k === 2 && i < 3) o += T(622, y + 23, 'full depth', { size: 12.5, color: K.ok, anchor: 'start', weight: 700 });
+    if (risky) o += T(618, y + 23, 'wins at depth 9', { size: 12.5, color: K.focus, anchor: 'start', weight: 700 }); });
+    return svg(o + T(360, 400, 'shallow evaluation of each candidate move (illustrative)', { size: 12.5, italic: true, color: K.muted }), 410); },
+  q: ['How does forward pruning differ from alpha–beta pruning?', ['It never changes the result', 'It can discard a move that would have been best', 'It works only in games of chance'], 1, 'Alpha–beta is exact; forward pruning is a heuristic gamble.'],
+  apply: 'Recruiters screening résumés with a quick filter make the same trade: far less work, with an occasional strong candidate cut.',
+  note: 'ProbCut is the textbook’s example: prune when a shallow search says a move is probably outside the window.' });
+
+L2.push({ id: '6.3.4', sec: '6.3 Heuristic search', title: 'Search versus lookup',
+  intro: 'At both ends of a chess game, search is replaced by tables computed in advance.',
+  steps: [
+    { c: 'Opening: play the first moves from an opening book built from centuries of games, and save the clock for later.', k: 0 },
+    { c: 'Middle game: no table can hold these positions. This is where alpha–beta, evaluation and quiescence do the work.', k: 1 },
+    { c: 'Endgame: tablebases store perfect play for every position with up to seven pieces, computed backward from checkmate.', k: 2 }],
+  draw: s => { let o = ''; const seg = [['Opening book', 60, 200, K.G, 'lookup'], ['Search', 260, 280, K.B, 'α–β + EVAL'], ['Tablebase', 540, 140, K.R, 'lookup']];
+    seg.forEach(([n, x, w, c, sub], i) => { const on = s.k === i; o += `<rect x="${x}" y="140" width="${w}" height="70" rx="${i === 1 ? 0 : 10}" fill="${c}" opacity="${on ? 0.9 : 0.25}"/>` + T(x + w / 2, 172, n, { size: 16, weight: 700, color: on ? '#fff' : K.ink }) + T(x + w / 2, 196, sub, { size: 13, color: on ? '#fff' : K.muted, italic: true }); });
+    o += T(60, 245, 'move 1', { anchor: 'start', size: 12.5, color: K.muted }) + T(680, 245, 'checkmate', { anchor: 'end', size: 12.5, color: K.muted });
+    const card = [['1. e4 c5 2. Nf3 d6 3. d4', 'known line: play instantly'], ['about 35 moves per position', 'search as deep as time allows'], ['≤ 7 pieces left', 'perfect move from the table']][s.k];
+    o += Box(170, 290, 380, 74, { fill: K.card }) + T(360, 320, card[0], { size: 15, weight: 700, mono: s.k === 0 }) + T(360, 348, card[1], { size: 14, italic: true, color: K.muted });
+    return svg(o, 400); },
+  q: ['Why can’t tablebases cover the middle game?', ['Middle-game positions are illegal', 'There are far too many positions to store', 'Tablebases only store openings'], 1, 'The count of positions explodes with the number of pieces; seven is the current limit.'],
+  apply: 'Customer-service bots do the same: canned answers for common openings, real reasoning for the unusual middle.',
+  note: 'Ask why a book is still useful when the engine could search the opening itself: time on the clock.' });
+
+/* ---- 6.4 MCTS ---- */
+function mctsTree() { // wins at a node are for the player who moved into it
+  const R = { id: 'R', w: 0, n: 20, kids: [{ id: 'A', w: 6, n: 9, kids: [{ id: 'A1', w: 2, n: 5 }, { id: 'A2', w: 1, n: 3 }] }, { id: 'B', w: 3, n: 6, kids: [{ id: 'B1', w: 2, n: 3 }, { id: 'B2', w: 1, n: 2 }] }, { id: 'C', w: 2, n: 5, kids: [{ id: 'C1', w: 3, n: 4 }] }] };
+  return R; }
+function mctsRun() { const R = mctsTree(), path = [R]; let cur = R; const scores = [];
+  while (cur.kids && cur.kids.length && cur.full !== false) { const sc = cur.kids.map(k => ({ id: k.id, u: ucb1(k.w, k.n, cur.n) })); scores.push(sc); const b = sc.reduce((a, c) => c.u > a.u ? c : a); cur = cur.kids.find(k => k.id === b.id); path.push(cur); if (path.length === 3) break; }
+  const nw = { id: 'new', w: 0, n: 0 }; cur.kids = (cur.kids || []).concat([nw]); path.push(nw);
+  return { R, path, scores, win: 'MAX' }; }
+const MC = mctsRun();
+const mPos = (R) => { const P = {}; P.R = [390, 60]; R.kids.forEach((k, i) => { P[k.id] = [180 + i * 210, 160]; (k.kids || []).forEach((g, j) => { P[g.id] = [P[k.id][0] - 55 + j * 110, 260]; (g.kids || []).forEach(h => { P[h.id] = [P[g.id][0], 345]; }); }); }); return P; };
+L2.push({ id: '6.4', sec: '6.4 Monte Carlo tree search', title: 'MCTS: one iteration, four phases',
+  intro: 'Instead of an evaluation function, MCTS plays many fast games to the end and keeps win and visit counts in a growing tree.',
+  steps: [
+    { c: 'Each node shows wins / visits, counted for the player who made the move into it. The root has been visited 20 times.', k: 0 },
+    { c: () => { const s0 = MC.scores[0]; return `Selection: at the root, UCB1 scores the children ${s0.map(x => `${x.id} ${r3(x.u)}`).join(', ')}. The highest, ${MC.path[1].id}, is followed.`; }, k: 1 },
+    { c: () => { const s1 = MC.scores[1]; return s1 ? `Selection continues one level down: ${s1.map(x => `${x.id} ${r3(x.u)}`).join(', ')}, so ${MC.path[2].id} is next. It has an untried move.` : 'This node has an untried move, so selection stops here.'; }, k: 2 },
+    { c: 'Expansion: one new child is added for an untried move, with 0 wins in 0 visits.', k: 3 },
+    { c: 'Simulation: from the new node, a fast playout with random moves runs to the end of the game. Here MAX wins.', k: 4 },
+    { c: () => `Back-propagation: every node on the path gains a visit, and the nodes where MAX made the move also gain a win. The root now has ${MC.R.n + 1} visits.`, k: 5 }],
+  draw: s => { const R = mctsRun().R, run = mctsRun(), P = mPos(run.R), onPath = new Set(run.path.map(p => p.id)); let o = '';
+    const phases = ['Selection', 'Expansion', 'Simulation', 'Back-propagation'], ph = [-1, 0, 0, 1, 2, 3][s.k];
+    phases.forEach((p, i) => { o += Box(30 + i * 168, 462, 158, 32, { fill: i === ph ? K.ink : K.card, stroke: i === ph ? K.ink : K.line, rx: 16 }) + T(109 + i * 168, 483, p, { size: 13.5, weight: 700, color: i === ph ? K.paper : K.muted }); });
+    const after = s.k === 5, depthOf2 = id => run.path.findIndex(p => p.id === id);
+    const show = n => { if (n.id === 'new' && s.k < 3) return false; return true; };
+    (function edges(n) { (n.kids || []).forEach(k => { if (!show(k)) return; const sel = (s.k >= 1 && onPath.has(k.id) && (s.k >= 2 || depthOf2(k.id) <= 1)) || (k.id === 'new' && s.k >= 3); o += E(P[n.id], P[k.id], { r1: 24, r2: 24, color: sel ? K.focus : K.line, w: sel ? 3.4 : 2, dash: k.id === 'new' }); edges(k); }); })(run.R);
+    (function draw(n, d) { if (!show(n)) return; let w = n.w, v = n.n; const k = depthOf2(n.id);
+      if (after && k >= 0) { v += 1; if (k % 2 === 1) w += 1; }
+      const lab = n.id === 'R' ? `${v}` : `${w}/${v}`, isNew = n.id === 'new';
+      o += N(P[n.id][0], P[n.id][1], lab, { r: 24, fs: 13, fill: isNew ? K.focusSoft : K.card, dash: isNew, ring: after && k >= 0 ? K.ok : null });
+      if (s.k === 1 && d === 1) { const sc = run.scores[0].find(x => x.id === n.id); o += Badge(P[n.id][0], P[n.id][1] + 30, 'UCB ' + r3(sc.u), n.id === run.path[1].id ? 'new' : 'plain'); }
+      if (s.k === 2 && d === 2 && run.scores[1]) { const sc = run.scores[1].find(x => x.id === n.id); if (sc) o += Badge(P[n.id][0], P[n.id][1] + 30, 'UCB ' + r3(sc.u), n.id === run.path[2].id ? 'new' : 'plain'); }
+      (n.kids || []).forEach(k => draw(k, d + 1)); })(run.R, 0);
+    if (s.k >= 4) { const [x, y] = P.new; o += `<path d="M${x},${y + 26} q 14 14 0 28 q -14 14 0 28" fill="none" stroke="${K.focus}" stroke-width="2.5" stroke-dasharray="4 4"/>` + Badge(x, y + 88, 'MAX wins', 'ok'); }
+    o += T(12, 64, 'MAX', { size: 12, anchor: 'start', color: K.muted }) + T(12, 164, 'MAX moved', { size: 12, anchor: 'start', color: K.muted }) + T(12, 264, 'MIN moved', { size: 12, anchor: 'start', color: K.muted });
+    return svg(o, 500); },
+  q: ['After thousands of iterations, which root move does MCTS usually play?', ['The one with the highest UCB1', 'The one with the most visits', 'The newest one'], 1, 'Visit count is the most robust signal: UCB1 kept returning to that move because it kept winning.'],
+  apply: 'MCTS plans in domains with no good evaluation function: video-game AI, robot task planning, and molecule design.',
+  note: 'The counts are a small constructed example; selection and update are computed on the page.' });
+
+const UC = [['A', 65, 100], ['B', 49, 80], ['C', 2, 10], ['D', 2, 3]], UN = 193;
+L2.push({ id: '6.4-ucb1', sec: '6.4 Monte Carlo tree search', title: 'UCB1: exploit or explore?',
+  intro: 'UCB1 adds an exploration bonus to each child’s win rate. The bonus is large for rarely tried moves and shrinks as they are visited.',
+  steps: [
+    { c: 'UCB1 = wᵢ/nᵢ + c·√(ln N / nᵢ), with c = √2. The root has been visited N = 193 times.', k: 0 },
+    ...UC.map(([n, w, v], k) => ({ c: `${n}: ${w} wins in ${v} visits gives ${r3(w / v)}, plus an exploration bonus of ${r3(ucb1(w, v, UN) - w / v)}, for ${r3(ucb1(w, v, UN))}.`, k: k + 1 })),
+    { c: () => { const b = UC.reduce((a, c) => ucb1(c[1], c[2], UN) > ucb1(a[1], a[2], UN) ? c : a); return `UCB1 selects ${b[0]}: not proven best after only ${b[2]} games, but it might be, and that is worth checking.`; }, k: 5 },
+    { c: () => { const b = UC.reduce((a, x) => x[1] / x[2] > a[1] / a[2] ? x : a); return `Set c = 0 and only win rates count: ${b[0]} leads with ${r3(b[1] / b[2])}, and C, at ${r3(0.2)}, would never be tried again however unlucky its 10 games were.`; }, k: 6 }],
+  draw: s => { let o = ''; const c = s.k === 6 ? 0 : Math.SQRT2, X0 = 120, SC = 168;
+    o += T(360, 40, s.k === 6 ? 'c = 0: win rate only' : 'UCB1 = win rate + exploration bonus', { size: 15, weight: 700 });
+    UC.forEach(([n, w, v], i) => { const y = 70 + i * 74, ex = w / v, bo = ucb1(w, v, UN, c) - ex, shown = s.k === 0 || s.k >= 5 || s.k >= i + 1, on = s.k === i + 1;
+      const tot = ucb1(w, v, UN, c), win = s.k >= 5 && UC.every(x => ucb1(x[1], x[2], UN, c) <= tot);
+      o += T(70, y + 30, n, { size: 20, weight: 700, color: on || win ? K.focus : K.ink }) + T(70, y + 50, `${w}/${v}`, { size: 12, color: K.muted });
+      if (s.k === 0 || !shown) { o += `<rect x="${X0}" y="${y + 12}" width="${ex * SC}" height="28" fill="${K.B}" opacity="${shown && s.k ? 0.8 : 0.3}"/>`; return; }
+      o += `<rect x="${X0}" y="${y + 12}" width="${ex * SC}" height="28" fill="${K.B}" opacity="0.85"/><rect x="${X0 + ex * SC}" y="${y + 12}" width="${bo * SC}" height="28" fill="${K.focus}" opacity="0.75"/>` + T(X0 + (ex + bo) * SC + 10, y + 32, r3(tot), { anchor: 'start', size: 14, weight: 700, color: win ? K.focus : K.ink });
+      if (win) o += Badge(X0 + (ex + bo) * SC + 112, y + 15, 'selected', 'new'); });
+    o += `<rect x="150" y="380" width="14" height="14" fill="${K.B}"/>` + T(172, 392, 'win rate wᵢ/nᵢ', { anchor: 'start', size: 12.5, color: K.muted }) + `<rect x="330" y="380" width="14" height="14" fill="${K.focus}"/>` + T(352, 392, 'exploration bonus', { anchor: 'start', size: 12.5, color: K.muted });
+    return svg(o, 410); },
+  q: ['Child C has 2 wins in 10 visits. Why does its UCB1 exceed A’s?', ['Its win rate is higher', 'Its exploration bonus outweighs its lower win rate', 'UCB1 ignores visits'], 1, '0.200 + 1.026 beats 0.650 + 0.324: few visits mean high uncertainty.'],
+  apply: 'The same exploration bonus drives A/B testing algorithms that decide which version of a web page to show next.',
+  note: 'Values match the lecture deck’s worked example (N = 193).' });
+
+L2.push({ id: '6.4-compare', sec: '6.4 Monte Carlo tree search', title: 'Why Go needed MCTS',
+  intro: 'Alpha–beta needs a modest branching factor and a good EVAL. Go offered neither.',
+  steps: [
+    { c: 'Branching factor: about 35 moves in a typical chess position, but 361 legal first moves on a 19 × 19 Go board.', k: 0 },
+    { c: 'No good EVAL: a Go stone’s worth depends on the whole board, and decades of hand-written evaluators played weakly.', k: 1 },
+    { c: 'AlphaGo combined MCTS with two networks: a policy network to narrow the moves, and a value network as a learned EVAL. It beat Lee Sedol 4–1 in March 2016.', k: 2 },
+    { c: 'Today the methods blend: AlphaZero runs MCTS guided by a network; Stockfish runs alpha–beta with a neural evaluation.', k: 3 }],
+  draw: s => { let o = '';
+    if (s.k === 0) { [['chess', 35, K.B], ['Go, first move', 361, K.R]].forEach(([n, b, c], i) => { const y = 110 + i * 110; o += T(180, y + 28, n, { anchor: 'end', size: 16, weight: 700 }) + `<rect x="200" y="${y}" width="${b * 1.2}" height="44" rx="4" fill="${c}" opacity="0.8"/>` + T(210 + b * 1.2, y + 29, String(b), { anchor: 'start', size: 18, weight: 700 }); });
+      o += T(360, 360, 'legal moves to consider at one node', { size: 13, italic: true, color: K.muted }); }
+    if (s.k === 1) { const z = 22, x0 = 250, y0 = 60; for (let i = 0; i < 13; i++) o += `<line x1="${x0}" y1="${y0 + i * z}" x2="${x0 + 12 * z}" y2="${y0 + i * z}" stroke="${K.ink}" stroke-width="1"/><line x1="${x0 + i * z}" y1="${y0}" x2="${x0 + i * z}" y2="${y0 + 12 * z}" stroke="${K.ink}" stroke-width="1"/>`;
+      [[3, 3, 'b'], [4, 3, 'w'], [3, 4, 'w'], [9, 9, 'b'], [8, 9, 'w'], [9, 3, 'b'], [6, 6, 'b'], [3, 9, 'w'], [4, 9, 'b'], [6, 7, 'w']].forEach(([c, r, col]) => { o += `<circle cx="${x0 + c * z}" cy="${y0 + r * z}" r="9.5" fill="${col === 'b' ? K.ink : K.card}" stroke="${K.ink}" stroke-width="1.4"/>`; });
+      o += `<circle cx="${x0 + 6 * z}" cy="${y0 + 6 * z}" r="16" fill="none" stroke="${K.focus}" stroke-width="3"/>` + T(360, 360, 'is this stone strong or weak? it depends on everything else', { size: 13.5, italic: true, color: K.muted }); }
+    if (s.k === 2) { o += Box(260, 150, 200, 80, { fill: K.focusSoft, stroke: K.focus }) + T(360, 186, 'MCTS', { size: 20, weight: 700 }) + T(360, 212, 'tree search', { size: 13, italic: true, color: K.muted });
+      o += Box(30, 60, 190, 74, { fill: K.card }) + T(125, 92, 'policy network', { size: 15, weight: 700 }) + T(125, 116, 'which moves to try', { size: 13, color: K.muted }) + E([220, 110], [260, 170], { arrow: true, r1: 0, r2: 0, color: K.ink });
+      o += Box(500, 60, 190, 74, { fill: K.card }) + T(595, 92, 'value network', { size: 15, weight: 700 }) + T(595, 116, 'who is winning', { size: 13, color: K.muted }) + E([500, 110], [460, 170], { arrow: true, r1: 0, r2: 0, color: K.ink });
+      o += T(360, 310, '4 – 1', { size: 40, weight: 700 }) + T(360, 345, 'AlphaGo vs. Lee Sedol, March 2016', { size: 14, color: K.muted }); }
+    if (s.k === 3) [['AlphaZero', 'MCTS + neural network', 'chess, shogi, Go from rules alone'], ['Stockfish', 'alpha–beta + neural EVAL', 'strongest classical chess engine']].forEach(([n, a, b], i) => { const x = 60 + i * 320; o += Box(x, 110, 280, 170, { fill: K.card }) + T(x + 140, 160, n, { size: 20, weight: 700 }) + T(x + 140, 200, a, { size: 14.5, color: K.B, weight: 700 }) + T(x + 140, 236, b, { size: 13, italic: true, color: K.muted }); });
+    return svg(o, 400); },
+  q: ['What did AlphaGo’s value network replace?', ['The game rules', 'A hand-written evaluation function', 'The random playouts entirely, from the start'], 1, 'It learned to estimate who is winning, the part humans could not write for Go.'],
+  apply: 'Protein-structure and chip-floorplan systems have borrowed this recipe: search guided by learned policy and value estimates.',
+  note: 'AlphaGo still mixed playouts with the value network; AlphaZero dropped playouts entirely.' });
+
+/* ---- 6.5 stochastic games ---- */
+L2.push({ id: '6.5', sec: '6.5 Stochastic games', title: 'Chance nodes',
+  intro: 'In backgammon both players see the board, but dice decide which moves are legal. The tree gains a third kind of node.',
+  steps: [
+    { c: 'Two dice give 36 ordered outcomes, each with probability 1/36.', k: 0 },
+    { c: 'Six of them are doubles, on the diagonal. Each double is its own roll: probability 1/36.', k: 1 },
+    { c: () => `The other 30 come in mirror pairs, since 1–6 and 6–1 are the same roll. That leaves 15 distinct rolls at 2/36 each, and ${6 + 15} distinct rolls in all.`, k: 2 },
+    { c: 'So the layers alternate: MAX moves, dice are rolled, MIN moves, dice are rolled, and so on.', k: 3 }],
+  draw: s => { let o = '';
+    if (s.k < 3) { const z = 46, x0 = 220, y0 = 50; for (let a = 1; a <= 6; a++) { o += T(x0 + (a - 0.5) * z, y0 - 10, String(a), { size: 14, weight: 700, color: K.muted }) + T(x0 - 16, y0 + (a - 0.5) * z + 5, String(a), { size: 14, weight: 700, color: K.muted });
+      for (let b = 1; b <= 6; b++) { const dbl = a === b, lower = b > a; let fill = K.card, txt = '';
+        if (s.k >= 1 && dbl) { fill = K.focusSoft; txt = '1/36'; } if (s.k >= 2 && !dbl) { fill = lower ? K.soft : K.card; txt = lower ? '' : '2/36'; }
+        o += Box(x0 + (a - 1) * z + 2, y0 + (b - 1) * z + 2, z - 4, z - 4, { fill, stroke: s.k >= 1 && dbl ? K.focus : K.line, rx: 5, op: s.k >= 2 && lower ? 0.45 : 0 }) + (txt ? T(x0 + (a - 0.5) * z, y0 + (b - 0.5) * z + 4, txt, { size: 11.5, weight: 700 }) : ''); } }
+      o += T(110, 200, s.k === 0 ? '36 outcomes' : s.k === 1 ? '6 doubles' : '6 + 15 = 21', { size: 17, weight: 700 }) + T(110, 225, s.k === 2 ? 'distinct rolls' : '', { size: 13, color: K.muted }); return svg(o, 360); }
+    const L = [['max', 'MAX chooses a move'], ['chance', 'dice are rolled'], ['min', 'MIN chooses a move'], ['chance', 'dice are rolled'], ['max', 'MAX chooses a move']];
+    L.forEach(([t, l], i) => { const y = 40 + i * 66; o += Shape({ t, x: 220, y }, '', { r: 18 }) + T(260, y + 5, l, { anchor: 'start', size: 15 }); if (i < 4) o += `<line x1="220" y1="${y + 22}" x2="220" y2="${y + 44}" stroke="${K.line}" stroke-width="2"/>`; });
+    return svg(o, 360); },
+  q: ['What is the probability of rolling a 3 and a 5, in either order?', ['1/36', '2/36', '1/21'], 1, '3–5 and 5–3 are two of the 36 equally likely ordered outcomes.'],
+  apply: 'Inventory planning alternates the same way: you choose an order, demand is random, a competitor reacts, demand moves again.',
+  note: 'Ask students why 1/21 is wrong: the 21 rolls are not equally likely.' });
+
+const EX = (sp) => layout(mk([[{ p: 0.9, s: [sp[0], sp[0]] }, { p: 0.1, s: [sp[1], sp[1]] }], [{ p: 0.9, s: [sp[2], sp[2]] }, { p: 0.1, s: [sp[3], sp[3]] }]], ['max', 'chance', 'min']), { x0: 60, x1: 660, y0: 50, dy: 105 });
+L2.push({ id: '6.5-expecti', sec: '6.5 Stochastic games', title: 'Expectiminimax, worked',
+  intro: 'MAX and MIN nodes work as before. A chance node takes the probability-weighted average of its children.',
+  steps: [
+    { c: 'MAX picks A₁ or A₂; then the dice decide, with probabilities 0.9 and 0.1; then MIN moves.', k: 0 },
+    { c: 'MIN nodes first: under A₁ they are worth 2 and 3; under A₂, 1 and 4.', k: 1 },
+    { c: () => { const t = EX([2, 3, 1, 4]), v = {}; minimax(t, v); return `Chance nodes average: A₁ is 0.9 × 2 + 0.1 × 3 = ${fmt(v[t.kids[0].id])}, and A₂ is 0.9 × 1 + 0.1 × 4 = ${fmt(v[t.kids[1].id])}.`; }, k: 2 },
+    { c: () => { const t = EX([2, 3, 1, 4]), v = {}; minimax(t, v); return `MAX takes the larger expectation, ${fmt(v[t.id])}, and plays ${best(t, v) === t.kids[0] ? 'A₁' : 'A₂'}.`; }, k: 3 }],
+  draw: s => { const t = EX([2, 3, 1, 4]); label(t, ['A₁', 'A₂']); const v = {}; minimax(t, v); const val = {}, hl = new Set();
+    t.kids.forEach(c => { c.kids.forEach(m => { if (s.k >= 1) val[m.id] = fmt(v[m.id]); if (s.k === 1) hl.add(m.id); }); if (s.k >= 2) val[c.id] = fmt(v[c.id]); if (s.k === 2) hl.add(c.id); });
+    if (s.k >= 3) { val[t.id] = fmt(v[t.id]); hl.add(t.id); }
+    return svg(drawTree(t, { val, hl, r: 20, path: s.k === 3 ? new Set([t.id, best(t, v).id]) : null }) + Legend(110, 400, ['max', 'chance', 'min', 'leaf']), 420); },
+  q: ['A chance node has children worth 10 (p = 0.5) and 0 (p = 0.5). Its value?', ['10', '5', '0'], 1, 'Expectation: 0.5 × 10 + 0.5 × 0.'],
+  apply: 'Insurance pricing is an expectiminimax calculation: you choose a policy, nature chooses the outcome with known probabilities.',
+  note: 'Same tree as the lecture deck’s Worked Example 3.' });
+
+L2.push({ id: '6.5.1', sec: '6.5 Stochastic games', title: 'With chance, the scale of EVAL matters',
+  intro: 'Minimax only compares values, so stretching them changes nothing. Expectiminimax averages them, and averages do change.',
+  steps: [
+    { c: () => { const t = EX([2, 3, 1, 4]), v = {}; minimax(t, v); return `With leaf values 2, 3, 1, 4: A₁ = ${fmt(v[t.kids[0].id])}, A₂ = ${fmt(v[t.kids[1].id])}. MAX picks A₁.`; }, k: 0 },
+    { c: () => { const t = EX([20, 30, 1, 400]), v = {}; minimax(t, v); return `Rescale to 20, 30, 1, 400. The order of the leaves is unchanged, but now A₁ = ${v[t.kids[0].id].toFixed(1)} and A₂ = ${v[t.kids[1].id].toFixed(1)}. The decision flips to A₂.`; }, k: 1 },
+    { c: 'The fix: EVAL must be a positive linear transformation of the probability of winning, not just in the right order.', k: 2 }],
+  draw: s => { let o = ''; const sets = [[2, 3, 1, 4], [20, 30, 1, 400]];
+    sets.forEach((sp, i) => { if (s.k < i) return; const t = EX(sp), v = {}; minimax(t, v); const x = 60 + i * 330, mx = Math.max(v[t.kids[0].id], v[t.kids[1].id]);
+      o += T(x + 135, 50, 'leaves ' + sp.join(', '), { size: 15, weight: 700 }); t.kids.forEach((c, j) => { const h = v[c.id] / mx * 220, cx = x + 50 + j * 130, win = v[c.id] === mx;
+        o += `<rect x="${cx}" y="${300 - h}" width="80" height="${h}" rx="4" fill="${win ? K.ok : K.B}" opacity="${win ? 0.9 : 0.5}"/>` + T(cx + 40, 290 - h, (sp[0] > 9 ? v[c.id].toFixed(1) : fmt(v[c.id])), { size: 15, weight: 700 }) + T(cx + 40, 325, ['A₁', 'A₂'][j], { size: 15, weight: 700 }); }); });
+    if (s.k === 2) o += Box(130, 345, 460, 44, { fill: K.focusSoft, stroke: K.focus }) + T(360, 373, 'EVAL ∝ probability of winning', { size: 16, weight: 700 });
+    return svg(o, 400); },
+  q: ['Doubling every leaf value in a deterministic minimax tree changes the chosen move…', ['Always', 'Never', 'Only with ties'], 1, 'Minimax compares; any order-preserving change keeps every comparison the same.'],
+  apply: 'Risk scores used for averaging, such as expected losses, must be on a true probability or money scale, not just a ranking.',
+  note: 'Practice problem: rescale the leaves so the decision flips the other way.' });
+
+/* ---- 6.6 partially observable ---- */
+const KF = 'abcdefgh', sq = (f, r) => KF[f] + (r + 1), rookAtt = (rf, rr) => { const a = new Set(); for (let i = 0; i < 8; i++) { a.add(sq(rf, i)); a.add(sq(i, rr)); } a.delete(sq(rf, rr)); return a; };
+function kriegBeliefs() { const B0 = []; for (let f = 5; f < 8; f++) for (let r = 5; r < 8; r++) B0.push(sq(f, r));
+  const atk1 = rookAtt(6, 0), B1 = B0.filter(x => atk1.has(x));
+  const B2 = [...new Set(B1.flatMap(x => { const f = KF.indexOf(x[0]), r = +x[1] - 1, out = []; for (let df = -1; df <= 1; df++) for (let dr = -1; dr <= 1; dr++) { const nf = f + df, nr = r + dr; if ((df || dr) && nf >= 0 && nf < 8 && nr >= 0 && nr < 8 && !atk1.has(sq(nf, nr))) out.push(sq(nf, nr)); } return out; }))].sort();
+  const atk2 = rookAtt(0, 6), B3 = B2.filter(x => atk2.has(x)); return [B0, B1, B2, B3]; }
+const KB = kriegBeliefs();
+L2.push({ id: '6.6', sec: '6.6 Partially observable games', title: 'Kriegspiel: tracking a belief state',
+  intro: 'In Kriegspiel you cannot see the opponent’s pieces. You track a belief state: every position consistent with what the referee has told you.',
+  steps: [
+    { c: () => `You know only that Black’s king is somewhere in the top-right corner: ${KB[0].length} squares are possible.`, k: 0 },
+    { c: () => `Your rook moves to g1 and the referee announces “check.” Only squares on the g-file survive: ${KB[1].join(', ')}.`, k: 1 },
+    { c: () => `Black moves, unseen. The king must step off the g-file, so the belief state grows to ${KB[2].length} squares.`, k: 2 },
+    { c: () => `Your rook swings to a7 and the referee says “check” again. Only ${KB[3].join(' and ')} remain.`, k: 3 }],
+  draw: s => { const z = 40, x0 = 200, y0 = 30, B = new Set(KB[s.k]), rook = s.k === 0 ? 'a1' : s.k < 3 ? 'g1' : 'a7'; let o = '';
+    for (let r = 7; r >= 0; r--) for (let f = 0; f < 8; f++) { const id = sq(f, r), x = x0 + f * z, y = y0 + (7 - r) * z, dark = (f + r) % 2 === 0;
+      o += `<rect x="${x}" y="${y}" width="${z}" height="${z}" fill="${B.has(id) ? K.focusSoft : dark ? K.line : K.card}" opacity="${B.has(id) || !dark ? 1 : 0.5}"/>`;
+      if (B.has(id)) o += T(x + z / 2, y + z * 0.72, '?', { size: 20, weight: 700, color: K.focus });
+      if (id === rook) o += T(x + z / 2, y + z * 0.8, '♖', { size: 32, weight: 400 }); if (id === 'e1') o += T(x + z / 2, y + z * 0.8, '♔', { size: 32, weight: 400 }); }
+    for (let i = 0; i < 8; i++) o += T(x0 + i * z + z / 2, y0 + 8 * z + 18, KF[i], { size: 12, color: K.muted }) + T(x0 - 12, y0 + (7 - i) * z + z * 0.62, String(i + 1), { size: 12, color: K.muted });
+    o += `<rect x="${x0}" y="${y0}" width="${8 * z}" height="${8 * z}" fill="none" stroke="${K.ink}" stroke-width="1.5"/>`;
+    o += Box(540, 140, 160, 90, { fill: K.card }) + T(620, 175, String(KB[s.k].length), { size: 32, weight: 700, color: K.focus }) + T(620, 205, 'possible squares', { size: 12.5, color: K.muted });
+    return svg(o, 380); },
+  q: ['Why did the belief state grow at step 3?', ['The referee lied', 'The opponent moved and you could not see where', 'Your rook moved'], 1, 'Each unseen opponent move spreads the belief over every square the king could reach.'],
+  apply: 'Tracking a hidden submarine, or a suspicious login across servers, uses the same belief-state update: observe, prune, spread.',
+  note: 'Simplified to the king only; real Kriegspiel belief states hold whole positions. Squares are computed from rook attacks on the page.' });
+
+const ROAD = [{ day: 'Day 1', good: 'left' }, { day: 'Day 2', good: 'right' }, { day: 'Day 3', good: null }];
+const GV = { small: 1, big: 2, bus: -10 };
+L2.push({ id: '6.6.2', sec: '6.6 Partially observable games', title: 'Card games and the flaw in clairvoyance',
+  intro: 'A tempting shortcut for hidden cards: sample many deals, solve each as if every card were visible, and average. The textbook’s road puzzle shows where it fails.',
+  steps: [
+    { c: 'Day 1: road A leads to a small heap of gold. Road B forks: left to a bigger heap, right to a bus. Knowing that, take B, then go left.', k: 0 },
+    { c: 'Day 2: the same, but now the right fork has the bigger heap. Take B, then go right.', k: 1 },
+    { c: () => `Day 3: you do not know which fork is which. Averaging over clairvoyance says each sample earns ${GV.big} on B and ${GV.small} on A, so it recommends B.`, k: 2 },
+    { c: () => `In reality you must guess at the fork: 0.5 × ${GV.big} + 0.5 × (${GV.bus}) = ${0.5 * GV.big + 0.5 * GV.bus}. Road A’s ${GV.small} was right. Sampling never values what you do not know.`, k: 3 }],
+  draw: s => { const d = ROAD[Math.min(s.k, 2)]; let o = T(360, 34, d.day, { size: 17, weight: 700 });
+    const S = [120, 220], F = [400, 220], A = [300, 90], Lt = [600, 120], Rt = [600, 320];
+    o += E(S, A, { r1: 18, r2: 34, w: 5, color: K.line }) + E(S, F, { r1: 18, r2: 14, w: 5, color: K.line }) + E(F, Lt, { r1: 14, r2: 34, w: 5, color: d.good === 'left' ? K.ok : d.good ? K.bad : K.line }) + E(F, Rt, { r1: 14, r2: 34, w: 5, color: d.good === 'right' ? K.ok : d.good ? K.bad : K.line });
+    o += N(S[0], S[1], 'you', { r: 20, fs: 12 }) + N(F[0], F[1], '?', { r: 14, fs: 12 }) + T(205, 150, 'A', { size: 15, weight: 700 }) + T(260, 240, 'B', { size: 15, weight: 700 });
+    o += Box(A[0] - 34, A[1] - 22, 110, 44, { fill: K.focusSoft, stroke: K.focus }) + T(A[0] + 21, A[1] + 6, 'gold +' + GV.small, { size: 13, weight: 700 });
+    const lbl = side => d.good === side ? ['big gold +' + GV.big, K.okSoft, K.ok] : d.good ? ['bus ' + GV.bus, K.badSoft, K.bad] : ['gold or bus?', K.card, K.line];
+    [[Lt, 'left'], [Rt, 'right']].forEach(([p, sd]) => { const [t, f, st] = lbl(sd); o += Box(p[0] - 34, p[1] - 22, 124, 44, { fill: f, stroke: st }) + T(p[0] + 28, p[1] + 6, t, { size: 13, weight: 700 }); });
+    if (s.k === 2) o += Box(150, 360, 420, 40, { fill: K.focusSoft, stroke: K.focus }) + T(360, 386, 'average of clairvoyant samples: B = 2 > A = 1', { size: 14, weight: 700 });
+    if (s.k === 3) o += Box(150, 360, 420, 40, { fill: K.badSoft, stroke: K.bad }) + T(360, 386, `real value of B when guessing: ${0.5 * GV.big + 0.5 * GV.bus}`, { size: 14, weight: 700, color: K.bad });
+    return svg(o, 410); },
+  q: ['Why can’t averaging over clairvoyance bluff?', ['Bluffing is against the rules', 'Each sample assumes all cards are visible, so hiding information has no value', 'It plays too slowly'], 1, 'If everyone sees everything, concealment is pointless; the method inherits that blind spot.'],
+  apply: 'Poker programs avoid this by computing equilibrium strategies: Libratus beat top professionals in 2017, and Pluribus won six-player games in 2019.',
+  note: 'Gold and bus values are illustrative; the textbook gives the puzzle without numbers.' });
+
+/* ---- 6.7 ---- */
+const MIL = [[1994, 'Chinook', 'world checkers champion'], [1997, 'Deep Blue', 'beats Kasparov at chess'], [2007, 'Checkers', 'solved: a draw'], [2016, 'AlphaGo', 'beats Lee Sedol at Go'], [2017, 'Libratus', 'beats poker professionals'], [2019, 'Pluribus', 'six-player poker']];
+const LIM = [['Exponential growth', 'even alpha–beta grows exponentially with depth'], ['Depends on EVAL', 'only as good as its estimates'], ['Horizon effect', 'blind just past the depth limit'], ['Assumes perfect play', 'never sets traps for a weaker opponent'], ['No metareasoning', 'searches lines that could not change the decision']];
+L2.push({ id: '6.7', sec: '6.7 Limitations', title: 'Limits of game search, and how far it got',
+  intro: 'Game search conquered checkers, chess, Go and poker, yet each method has blind spots worth knowing.',
+  steps: [
+    { c: 'Five limitations: cost still grows exponentially, results hinge on EVAL, the horizon hides threats, perfect play is assumed, and the search cannot judge which computations are worth doing.', k: 0 },
+    { c: 'The milestones, part one: Chinook took the checkers world title in 1994, and Deep Blue beat Kasparov in 1997.', k: 1 },
+    { c: 'Part two: checkers was solved in 2007, AlphaGo won at Go in 2016, and Libratus and Pluribus beat poker professionals in 2017 and 2019.', k: 2 }],
+  draw: s => { let o = '';
+    if (s.k === 0) { LIM.forEach(([a, b], i) => { o += Box(90, 30 + i * 70, 540, 56, { fill: K.card }) + T(120, 64 + i * 70, String(i + 1), { size: 18, weight: 700, color: K.focus }) + T(150, 57 + i * 70, a, { anchor: 'start', size: 16, weight: 700 }) + T(150, 77 + i * 70, b, { anchor: 'start', size: 13.5, color: K.muted }); }); return svg(o, 400); }
+    const X = y => 60 + (y - 1990) * 20.5; o += `<line x1="50" y1="200" x2="680" y2="200" stroke="${K.ink}" stroke-width="2"/>`;
+    MIL.forEach(([y, n, d], i) => { const on = s.k === 1 ? i < 2 : i >= 2, up = i % 2 === 0, x = 90 + i * 108;
+      o += `<circle cx="${x}" cy="200" r="7" fill="${on ? K.focus : K.line}"/><line x1="${x}" y1="${up ? 193 : 207}" x2="${x}" y2="${up ? 130 : 270}" stroke="${on ? K.focus : K.line}" stroke-width="1.5"/>`;
+      o += `<g opacity="${on ? 1 : 0.35}">` + T(x, up ? 82 : 298, String(y), { size: 14, weight: 700, color: K.muted }) + T(x, up ? 104 : 320, n, { size: 15, weight: 700 }) + T(x, up ? 124 : 340, d, { size: 12, color: K.muted }) + '</g>'; });
+    return svg(o, 400); },
+  q: ['Which limitation does quiescence search address?', ['Exponential growth', 'The horizon effect', 'Assuming perfect play'], 1, 'It extends search through unstable positions just past the depth limit.'],
+  apply: 'The same limits show up in any planning AI: exponential cost, imperfect estimates, a fixed lookahead, and an assumed model of others.',
+  note: 'Ask which limitation MCTS avoids (a hand-written EVAL) and which it adds (missing a narrow forced line).' });
+
+const DEC = [['Dice or other chance?', 'Expectiminimax', 'backgammon'], ['Hidden information?', 'Belief states, sampling, equilibria', 'poker, Kriegspiel'], ['Good EVAL, modest branching?', 'Alpha–beta, cutoff, quiescence', 'chess, checkers'], [null, 'Monte Carlo tree search', 'Go, new games']];
+L2.push({ id: 'review', sec: 'Review', title: 'Which method, when?',
+  intro: 'Three questions about a game point to the right algorithm.',
+  steps: [
+    { c: 'First ask whether chance is involved. If so, add chance nodes and use expectiminimax.', k: 0 },
+    { c: 'Next, is information hidden? Then reason over belief states, sample deals, or compute equilibrium strategies.', k: 1 },
+    { c: 'Deterministic and fully visible, with a good EVAL and a moderate branching factor: alpha–beta with a cutoff and quiescence.', k: 2 },
+    { c: 'No reliable EVAL, or a huge branching factor: Monte Carlo tree search, which needs only the rules.', k: 3 }],
+  draw: s => { let o = '';
+    DEC.forEach(([q, a, g], i) => { const y = 30 + i * 92, on = s.k === i, pass = s.k > i;
+      if (q) o += Box(40, y, 300, 60, { fill: on ? K.focusSoft : K.card, stroke: on ? K.focus : K.line, sw: on ? 2.4 : 1.3 }) + T(190, y + 36, q, { size: 14.5, weight: 700 });
+      if (q && i < 3) o += E([190, y + 60], [190, y + 92], { arrow: true, r1: 0, r2: 0, color: pass ? K.focus : K.line, label: 'no', lc: K.muted });
+      const ax = q ? 400 : 40, aw = q ? 290 : 300; o += E([q ? 340 : 190, y + 30], [ax, y + 30], { arrow: !!q, r1: 0, r2: 0, color: on ? K.focus : K.line, label: q ? 'yes' : '' });
+      o += Box(ax, y, aw, 60, { fill: on ? K.ink : K.card, stroke: on ? K.ink : K.line, rx: 30 }) + T(ax + aw / 2, y + 28, a, { size: 13.5, weight: 700, color: on ? K.paper : K.ink }) + T(ax + aw / 2, y + 47, g, { size: 12, italic: true, color: on ? K.paper : K.muted }); });
+    return svg(o, 400); },
+  q: ['A new board game has a huge branching factor and no known strategy. Which method fits first?', ['Plain minimax', 'Alpha–beta with a hand-tuned EVAL', 'Monte Carlo tree search'], 2, 'MCTS needs only the rules and copes with large branching.'],
+  apply: 'Real systems combine these: AlphaZero pairs MCTS with a learned evaluation, and poker bots mix sampling with equilibrium play.',
+  note: 'Use this chart to frame the Week 5 discussion on zero-sum games.' });
+
+(function () {
+  const LS = L1.concat(L2); let li = 0, si = 0, timer = null; const seen = new Set();
+  const $ = id => document.getElementById(id);
+  const capText = st => typeof st.c === 'function' ? st.c() : st.c;
+  // navigation
+  let html = '', sec = '';
+  LS.forEach((L, i) => { if (L.sec !== sec) { if (sec) html += '</ol>'; sec = L.sec; html += `<h3>${esc(sec)}</h3><ol>`; } html += `<li><a href="#${L.id}" data-i="${i}"><span class="num">${esc(L.id.replace(/-.*/, ''))}</span><span>${esc(L.title)}</span></a></li>`; });
+  $('navlist').innerHTML = html + '</ol>';
+  $('navsel').innerHTML = LS.map((L, i) => `<option value="${i}">${esc(L.id.replace(/-.*/, ''))}  ${esc(L.title)}</option>`).join('');
+  $('navsel').addEventListener('change', e => go(+e.target.value, 0));
+  function setQuiz(L) {
+    const [q, opts, ans, why] = L.q; $('q').textContent = q; $('why').textContent = '';
+    $('opts').innerHTML = opts.map((o, k) => `<button data-k="${k}">${esc(o)}</button>`).join('');
+    $('opts').querySelectorAll('button').forEach(b => b.addEventListener('click', () => {
+      const k = +b.dataset.k; $('opts').querySelectorAll('button').forEach(x => x.classList.remove('right', 'wrong'));
+      b.classList.add(k === ans ? 'right' : 'wrong'); $('why').textContent = (k === ans ? 'Correct. ' : 'Not quite. ') + why; }));
+  }
+  function render(newLesson) {
+    const L = LS[li], st = L.steps[si];
+    if (newLesson) { $('sectnum').textContent = L.id.replace(/-.*/, ''); $('title').textContent = L.title; $('intro').textContent = L.intro; $('apply').textContent = L.apply; $('note').textContent = L.note; setQuiz(L);
+      document.title = L.title + ' — CS650 Chapter 6'; seen.clear();
+      document.querySelectorAll('nav a').forEach(a => a.setAttribute('aria-current', +a.dataset.i === li ? 'true' : 'false')); $('navsel').value = li;
+      const cur = document.querySelector('nav a[aria-current="true"]'); if (cur && cur.scrollIntoView && window.innerWidth > 860) cur.scrollIntoView({ block: 'nearest' }); }
+    seen.add(si);
+    $('fig').innerHTML = L.draw(st, si);
+    $('cap').textContent = capText(st); $('count').textContent = `${si + 1} of ${L.steps.length}`;
+    $('dots').innerHTML = L.steps.map((_, k) => `<button aria-label="Step ${k + 1}" aria-current="${k === si}" class="${k !== si && seen.has(k) ? 'seen' : ''}" data-k="${k}"></button>`).join('');
+    $('dots').querySelectorAll('button').forEach(b => b.addEventListener('click', () => { stop(); si = +b.dataset.k; render(false); }));
+    $('prev').disabled = li === 0 && si === 0; $('next').disabled = li === LS.length - 1 && si === L.steps.length - 1;
+    $('next').textContent = si === L.steps.length - 1 && li < LS.length - 1 ? 'Next lesson' : 'Next step';
+    if (location.hash.slice(1) !== L.id) history.replaceState(null, '', '#' + L.id);
+  }
+  function go(l, s) { const nl = l !== li; li = l; si = s; render(nl); if (nl) window.scrollTo({ top: 0 }); }
+  function next() { const L = LS[li]; if (si < L.steps.length - 1) { si++; render(false); } else if (li < LS.length - 1) go(li + 1, 0); else stop(); }
+  function prev() { if (si > 0) { si--; render(false); } else if (li > 0) go(li - 1, LS[li - 1].steps.length - 1); }
+  function stop() { if (timer) { clearInterval(timer); timer = null; $('play').textContent = 'Play'; $('play').setAttribute('aria-pressed', 'false'); } }
+  $('next').addEventListener('click', () => { stop(); next(); }); $('prev').addEventListener('click', () => { stop(); prev(); });
+  $('play').addEventListener('click', () => { if (timer) return stop(); timer = setInterval(next, 4200); $('play').textContent = 'Pause'; $('play').setAttribute('aria-pressed', 'true'); });
+  document.querySelectorAll('nav a').forEach(a => a.addEventListener('click', e => { e.preventDefault(); stop(); go(+a.dataset.i, 0); }));
+  $('notesBtn').addEventListener('click', () => { const on = $('notesBtn').getAttribute('aria-pressed') !== 'true'; $('notesBtn').setAttribute('aria-pressed', on); $('note').hidden = !on; try { localStorage.setItem('cs650-notes', on ? '1' : '0'); } catch (e) {} });
+  try { if (localStorage.getItem('cs650-notes') === '1') { $('notesBtn').setAttribute('aria-pressed', 'true'); $('note').hidden = false; } } catch (e) {}
+  document.addEventListener('keydown', e => { if (e.target.closest('select,input,textarea') || e.altKey || e.metaKey || e.ctrlKey) return; if (e.key === 'ArrowRight') { stop(); next(); } if (e.key === 'ArrowLeft') { stop(); prev(); } });
+  function fromHash() { const h = decodeURIComponent(location.hash.slice(1)); const i = LS.findIndex(L => L.id === h); return i < 0 ? 0 : i; }
+  window.addEventListener('hashchange', () => { const i = fromHash(); if (i !== li) go(i, 0); });
+  li = fromHash(); render(true);
+})();
+</script>
+</body>
+</html>
